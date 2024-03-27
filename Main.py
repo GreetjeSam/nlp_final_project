@@ -2,11 +2,12 @@ from Preprocessing import Preprocessing
 from FeatureExtraction import FeatureExtraction
 from MakeVocab import MakeVocab
 from Training import Training
+from Encoder_Decoder import EngEncoder, Attention, NlDecoder
 import pickle
 
 
 def main():
-    
+    '''
     preprocesser = Preprocessing()
     # load English data
     filename_eng = 'europarl-v7.nl-en.en'
@@ -28,12 +29,12 @@ def main():
         paired_sent.append([eng_line, nl_line])
 
     preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")
-    
+    '''
     # load doc into memory
     with open("cleaned_pairs.txt", 'rb') as f:
         paired_sent = pickle.load(f)
 
-    paired_sent = paired_sent[:5000]
+    paired_sent = paired_sent[:100]
 
     vocab_eng = MakeVocab()
     vocab_nl = MakeVocab()
@@ -48,10 +49,17 @@ def main():
     print(vocab_eng.to_word(3))
     print(vocab_nl.to_word(3))
 
+    print(longest_sentence)
 
     feat_extraction = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
     train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(40, paired_sent, longest_sentence)
     
+    hidden_state_size = 128
+    encoder = EngEncoder(vocab_eng.num_words, hidden_state_size)
+    decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence+1)
+
+    trainer = Training()
+    trainer.train(train_dataloader, encoder, decoder, 10, print_every=5, plot_every=5)
 
 if __name__ == "__main__":
     main()

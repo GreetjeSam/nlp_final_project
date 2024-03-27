@@ -25,8 +25,11 @@ class FeatureExtraction():
         n = len(paired_sent)
         input_ids = np.zeros((n, longest_sentence+1), dtype=np.int32)
         target_ids = np.zeros((n, longest_sentence+1), dtype=np.int32)
-        
+        counter = 0
         for index, (input, target) in enumerate(paired_sent):
+            if counter < 6:
+                print(index, input, target)
+            counter += 1
             inp_ids = self.indexesFromSentence(self.eng_vocab_word2index, input)
             tgt_ids = self.indexesFromSentence(self.nl_vocab_word2index, target)
             inp_ids.append(self.EOS_token)
