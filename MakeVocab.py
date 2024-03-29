@@ -1,3 +1,6 @@
+import pickle
+
+
 class MakeVocab():
     def __init__(self) -> None:
         self.word2index = {}
@@ -30,8 +33,40 @@ class MakeVocab():
             self.num_sentences += 1
 
     def make_vocab(self, paired_sent, index):
-         for pair in paired_sent:
-              self.add_sentence(pair[index])
+        for pair in paired_sent:
+             self.add_sentence(pair[index])
+
+        with open("word2index" + str(index) + ".txt", 'wb') as f:
+            pickle.dump(self.word2index, f)
+        print('Saved: %s' % "word2index" + str(index) + ".txt")
+
+        with open("word2count" + str(index) + ".txt", 'wb') as f:
+            pickle.dump(self.word2count, f)
+        print('Saved: %s' % "word2count" + str(index) + ".txt")
+
+        with open("index2word" + str(index) + ".txt", 'wb') as f:
+            pickle.dump(self.index2word, f)
+        print('Saved: %s' % "index2word" + str(index) + ".txt")
+
+        with open("words_sents_Lsents" + str(index) + ".txt", 'wb') as f:
+             pickle.dump([self.num_words, self.num_sentences, self.longest_sentence], f)
+
+    def load_vocabularies(self, index):
+        with open("index2word" + str(index) + ".txt", 'rb') as f:
+            self.index2word = pickle.load(f)
+
+        with open("word2index" + str(index) + ".txt", 'rb') as f:
+            self.word2index = pickle.load(f)
+
+        with open("word2count" + str(index) + ".txt", 'rb') as f:
+            self.word2count = pickle.load(f)
+    
+        with open("words_sents_Lsents" + str(index) + ".txt", 'rb') as f:
+            nwords_nsetns_Lsent = pickle.load(f)
+            self.num_words = nwords_nsetns_Lsent[0]
+            self.num_sentences = nwords_nsetns_Lsent[1]
+            self.longest_sentence = nwords_nsetns_Lsent[2]
+
 
     def to_word(self, index):
         return self.index2word[index]

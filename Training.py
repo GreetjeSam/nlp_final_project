@@ -1,6 +1,9 @@
 import math
 import time
+from Encoder_Decoder import EngEncoder, NlDecoder
+from torch.utils.data import DataLoader
 from torch.nn import Module as mod
+from torch.nn import CrossEntropyLoss
 import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
@@ -21,14 +24,14 @@ class Training():
         seconds -= minutes * 60
         return '%dm %ds' % (minutes, seconds)
 
-    def timeSince(self, since, percent):
+    def timeSince(self, since: float, percent: float):
         now = time.time()
         seconds = now - since
         estimate = seconds / (percent)
         remaining = estimate - seconds
         return '%s (- %s)' % (self.asMinutes(seconds), self.asMinutes(remaining))
     
-    def showPlot(self, points):
+    def showPlot(self, points: list):
         plt.figure()
         fig, ax = plt.subplots()
         # this locator puts ticks at regular intervals
@@ -36,8 +39,8 @@ class Training():
         ax.yaxis.set_major_locator(loc)
         plt.plot(points)
     
-    def train_epoch(self, train_dataloader, encoder, decoder, encoder_optimizer, 
-                    decoder_optimizer, criterion):
+    def train_epoch(self, train_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder, encoder_optimizer, 
+                    decoder_optimizer, criterion: CrossEntropyLoss):
         total_loss = 0
 
         for data in train_dataloader:
@@ -67,15 +70,16 @@ class Training():
         return total_loss / len(train_dataloader)
 
     # hyper parameter tuning: nr epochs, learning rate, the adam optimizer
-    def train(self, train_dataloader, encoder, decoder, n_epochs: int, learning_rate: float =0.001,
+    def train(self, train_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder, n_epochs: int, 
+              optimizer: (optim.Adam|optim.Adadelta), learning_rate: float =0.001,
                print_every: int =100, plot_every: int =100):
         start = time.time()
         plot_losses = []
         print_loss_total = 0  # Reset every print_every
         plot_loss_total = 0  # Reset every plot_every
 
-        encoder_optimizer = optim.Adam(mod.parameters(encoder), lr=learning_rate)
-        decoder_optimizer = optim.Adam(mod.parameters(decoder), lr=learning_rate)
+        encoder_optimizer = optimizer(mod.parameters(encoder), lr=learning_rate)
+        decoder_optimizer = optimizer(mod.parameters(decoder), lr=learning_rate)
         
         # Using the cross entropy loss
         criterion = nn.CrossEntropyLoss()
@@ -85,6 +89,9 @@ class Training():
                                encoder_optimizer, decoder_optimizer, criterion)
             print_loss_total += loss
             plot_loss_total += loss
+
+            if epoch == n_epochs:
+                final_loss = print_loss_total / print_every
 
             if epoch % print_every == 0:
                 print_loss_avg = print_loss_total / print_every
@@ -98,3 +105,4 @@ class Training():
                 plot_loss_total = 0
 
         self.showPlot(plot_losses)
+        return final_loss
