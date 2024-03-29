@@ -11,7 +11,7 @@ import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
-    '''
+    
     preprocesser = Preprocessing()
     # load English data
     filename_eng = 'europarl-v7.nl-en.en'
@@ -37,19 +37,19 @@ def main():
             paired_sent.append([eng_line, nl_line])
 
     preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")
-    '''
+    
     # load doc into memory
     with open("cleaned_pairs.txt", 'rb') as f:
         paired_sent = pickle.load(f)
 
     paired_sent = paired_sent[:100]
 
-    '''
+    
     vocab_eng_temp = MakeVocab()
     vocab_nl_temp = MakeVocab()
     vocab_eng_temp.make_vocab(paired_sent, 0)
     vocab_nl_temp.make_vocab(paired_sent, 1)
-    '''
+    
 
     vocab_eng = MakeVocab()
     vocab_nl = MakeVocab()
