@@ -30,7 +30,11 @@ def main():
 
     paired_sent = []
     for eng_line, nl_line in zip(sentences_eng, sentences_nl):
-        paired_sent.append([eng_line, nl_line])
+        sen_nl = nl_line.split()
+        sen_eng = eng_line.split()
+
+        if len(sen_nl) < 128 and len(sen_eng) < 128 and len(sen_nl) > 0 and len(sen_eng) > 0:
+            paired_sent.append([eng_line, nl_line])
 
     preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")
     '''
