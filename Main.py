@@ -68,18 +68,18 @@ def main():
     encoder = EngEncoder(vocab_eng.num_words, hidden_state_size).to(device)
     decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence+1).to(device)
     
-    validator = Validation(epochs=[3, 5], learning_rates=[0.001, 0.0025], optimizers=[optim.Adam, optim.Adadelta])
-    validator.run_validation(train_dataloader, encoder, decoder)
-    print(validator.val_losses)
+    validator = Validation(epochs=[2, 3], learning_rates=[0.001, 0.0025], optimizers=[optim.Adam, optim.Adadelta])
+    best_paramters = validator.run_validation(train_dataloader, encoder, decoder)
+    print(best_paramters)
 
-    
+    '''
     trainer = Training()
     trainer.train(train_dataloader, encoder, decoder, 10, optim.Adam ,print_every=2, plot_every=2)
     
     
     torch.save(encoder.state_dict(), "nlp_final_project\models\encoder_df1000_batch64.pt")
     torch.save(decoder.state_dict(), "nlp_final_project\models\decoder_df1000_batch64.pt")
-    
+    '''
 
     ''' encoder.load_state_dict(torch.load("models/encoder_df1000_batch64.pt"))
     decoder.load_state_dict(torch.load("models/decoder_df1000_batch64.pt"))
