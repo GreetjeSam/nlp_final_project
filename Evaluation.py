@@ -11,7 +11,7 @@ class Evaluation():
     def evaluate(self, encoder, decoder, sentence, input_lang, output_lang):
         with torch.no_grad():
             feature_extractor = FeatureExtraction()
-            input_tensor = feature_extractor.tensorFromSentence(input_lang, sentence)
+            input_tensor = feature_extractor.tensorFromSentence(input_lang.word2index, sentence)
 
             encoder_outputs, encoder_hidden = encoder(input_tensor)
             decoder_outputs, decoder_hidden, decoder_attn = decoder(encoder_outputs, encoder_hidden)
