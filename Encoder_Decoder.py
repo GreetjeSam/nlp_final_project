@@ -6,7 +6,7 @@ import MakeVocab
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class EngEncoder(nn.Module):
-    def __init__(self, eng_word_size, hidden_state_size, dropout_probability = 0.1):
+    def __init__(self, eng_word_size: int, hidden_state_size: int, dropout_probability: float = 0.1):
         super(EngEncoder, self).__init__()
         self.hidden_size = hidden_state_size
 
@@ -33,7 +33,7 @@ class EngEncoder(nn.Module):
     
 
 class Attention(nn.Module):
-    def __init__(self, hidden_state_size):
+    def __init__(self, hidden_state_size: int):
         super(Attention, self).__init__()
         
         #apply the linear transformation
@@ -57,7 +57,7 @@ class Attention(nn.Module):
 
 # not finished
 class NlDecoder(nn.Module):
-    def __init__(self, hidden_state_size, output_size, vocab_nl, longest_sentence, dropout_p=0.1):
+    def __init__(self, hidden_state_size: int, output_size: int, vocab_nl, longest_sentence: int, dropout_p: float =0.1):
         super(NlDecoder, self).__init__()
 
         #using the embedding module to get word embeddings 
@@ -75,6 +75,7 @@ class NlDecoder(nn.Module):
 
     def forward(self, encoder_outputs, encoder_hidden, target_tensor=None):
         batch_size = encoder_outputs.size(0)
+        # it also puts it to device here?
         decoder_input = torch.empty(batch_size, 1, dtype=torch.long, device=device).fill_(0) #0 is SOS_token
         decoder_hidden = encoder_hidden
         decoder_outputs = []

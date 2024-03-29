@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class FeatureExtraction():
     def __init__(self, eng_vocab_word2index, nl_vocab_word2index) -> None:
@@ -25,27 +26,20 @@ class FeatureExtraction():
         n = len(paired_sent)
         input_ids = np.zeros((n, longest_sentence+1), dtype=np.int32)
         target_ids = np.zeros((n, longest_sentence+1), dtype=np.int32)
-        counter = 0
         for index, (input, target) in enumerate(paired_sent):
-            if counter < 6:
-                print(index, input, target)
-            counter += 1
             inp_ids = self.indexesFromSentence(self.eng_vocab_word2index, input)
             tgt_ids = self.indexesFromSentence(self.nl_vocab_word2index, target)
             inp_ids.append(self.EOS_token)
             tgt_ids.append(self.EOS_token)
             input_ids[index, :len(inp_ids)] = inp_ids
             target_ids[index, :len(tgt_ids)] = tgt_ids
-
-        print(input_ids[:5])
-        print(target_ids[:5])
         
 
         all_data = TensorDataset(torch.LongTensor(input_ids),
                                torch.LongTensor(target_ids))
     
-        train_size = int(0.49 * len(all_data))
-        val_size = int(0.21 * len(all_data))
+        train_size = int(0.64 * len(all_data))
+        val_size = int(0.16 * len(all_data))
         test_size = len(all_data) - train_size - val_size
         
         train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(all_data, [train_size, val_size, test_size])

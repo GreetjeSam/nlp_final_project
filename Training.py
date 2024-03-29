@@ -8,12 +8,15 @@ import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 import matplotlib.ticker as ticker
 import numpy as np
+import torch
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Training():
     def __init__(self) -> None:
         pass
 
-    def asMinutes(self, seconds):
+    def asMinutes(self, seconds: int):
         minutes = math.floor(seconds / 60)
         seconds -= minutes * 60
         return '%dm %ds' % (minutes, seconds)
@@ -35,13 +38,12 @@ class Training():
     
     def train_epoch(self, train_dataloader, encoder, decoder, encoder_optimizer, 
                     decoder_optimizer, criterion):
-        # this is just the training where the backpropegation is done
-        # the validation does not do backpropegation, so we don't
-        # add the validation to this. We do it after
         total_loss = 0
 
         for data in train_dataloader:
             input_tensor, target_tensor = data
+            input_tensor = input_tensor.to(device)
+            target_tensor = target_tensor.to(device)
             
             # resets gradients of all optimized tensors
             encoder_optimizer.zero_grad()
@@ -50,10 +52,7 @@ class Training():
             encoder_outputs, encoder_hidden = encoder(input_tensor)
             decoder_outputs, _, _, = decoder(encoder_outputs, encoder_hidden, target_tensor)
 
-            #print(decoder_outputs.size(), target_tensor.size())
-
             # calculate the actual cross entropy loss with the decoder predictions and the targets
-            #print(decoder_outputs.view(-1, decoder_outputs.size(-1)).size(), target_tensor.view(-1).size())
             loss = criterion(decoder_outputs.view(-1, decoder_outputs.size(-1)),
                              target_tensor.view(-1))
             loss.backward()
@@ -68,8 +67,8 @@ class Training():
         return total_loss / len(train_dataloader)
 
     # hyper parameter tuning: nr epochs, learning rate, the adam optimizer
-    def train(self, train_dataloader, encoder, decoder, n_epochs, learning_rate=0.001,
-               print_every=100, plot_every=100):
+    def train(self, train_dataloader, encoder, decoder, n_epochs: int, learning_rate: float =0.001,
+               print_every: int =100, plot_every: int =100):
         start = time.time()
         plot_losses = []
         print_loss_total = 0  # Reset every print_every

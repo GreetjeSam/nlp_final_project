@@ -8,7 +8,7 @@ class Preprocessing():
     def __init__(self) -> None:
         pass
 
-    def load_doc(self, filename):
+    def load_doc(self, filename: str):
         file = open(filename, mode='rt', encoding='utf-8')
         text = file.read()
         file.close()
@@ -43,7 +43,7 @@ class Preprocessing():
             cleaned.append(' '.join(line))
         return cleaned
 
-    def save_clean_pairs(self, paired_sent, filename):
+    def save_clean_pairs(self, paired_sent: list, filename: str):
         with open(filename, 'wb') as f:
             pickle.dump(paired_sent, f)
         print('Saved: %s' % filename)
