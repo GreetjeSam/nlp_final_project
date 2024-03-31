@@ -3,6 +3,7 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from FeatureExtraction import FeatureExtraction
+from torchtext.data.metrics import bleu_score
 
 class Evaluation():
     def __init__(self) -> None:
@@ -59,3 +60,9 @@ class Evaluation():
         print('input =', input_sentence)
         print('output =', ' '.join(output_words))
         self.showAttention(input_sentence, output_words, attentions[0, :len(output_words), :])
+
+
+    def bleu_score(self, candidate_corpus, references_corpus):
+        candidate_corpus = [['My', 'full', 'pytorch', 'test'], ['No','Match']]
+        references_corpus = [[['My', 'full', 'pytorch', 'test'], ['Completely', 'Different']], [['No', 'Match']]]
+        return bleu_score(candidate_corpus, references_corpus)
