@@ -140,7 +140,6 @@ class NlDecoder(nn.Module):
 
         #let the output go through the output layer
         output = self.output_layer(output)
-
         return output, hidden_state, attn_weights
 
     
