@@ -9,10 +9,10 @@ class Evaluation():
     def __init__(self) -> None:
         self.EOS_token = 1
 
-    def evaluate(self, encoder, decoder, sentence, input_lang, output_lang):
+    def evaluate(self, encoder, decoder, sentence, vocab_eng, vocab_nl):
         with torch.no_grad():
-            feature_extractor = FeatureExtraction()
-            input_tensor = feature_extractor.tensorFromSentence(input_lang.word2index, sentence)
+            feature_extractor = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
+            input_tensor = feature_extractor.tensorFromSentence(vocab_eng.word2index, sentence)
 
             encoder_outputs, encoder_hidden = encoder(input_tensor)
             decoder_outputs, decoder_hidden, decoder_attn = decoder(encoder_outputs, encoder_hidden)
@@ -25,15 +25,15 @@ class Evaluation():
                 if idx.item() == self.EOS_token:
                     decoded_words.append('<EOS>')
                     break
-                decoded_words.append(output_lang.index2word[idx.item()])
+                decoded_words.append(vocab_nl.index2word[idx.item()])
         return decoded_words, decoder_attn
     
-    def evaluateRandomly(self, encoder, decoder, paired_sent, n=10):
+    def evaluateRandomly(self, encoder, decoder, paired_sent, vocab_eng, vocab_nl, n=10):
         for i in range(n):
             pair = random.choice(paired_sent)
             print('>', pair[0])
             print('=', pair[1])
-            output_words, _ = self.evaluate(encoder, decoder, pair[0], self.input_lang, self.output_lang)
+            output_words, _ = self.evaluate(encoder, decoder, pair[0], vocab_eng, vocab_nl)
             output_sentence = ' '.join(output_words)
             print('<', output_sentence)
             print('') 

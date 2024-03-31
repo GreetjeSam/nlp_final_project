@@ -110,13 +110,13 @@ class NlDecoder(nn.Module):
                 # Without teacher forcing: use its own predictions as the next input
                 _, topi = decoder_output.topk(1)
                 decoder_input = topi.squeeze(-1).detach()  # detach from history as input
-
+        #print(decoder_outputs)
         #concatenate the decoder_outputs in one dimension
         decoder_outputs = torch.cat(decoder_outputs, dim=1)
 
         #get the last-dimension tensor after using log_softmax
         decoder_outputs = F.log_softmax(decoder_outputs, dim=-1)
-
+        #print(decoder_outputs)
         #concatenate the attention in one dimension
         attentions = torch.cat(attentions, dim=1)
 

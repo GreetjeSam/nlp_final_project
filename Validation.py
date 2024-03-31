@@ -12,12 +12,12 @@ class Validation(Training):
         self.optimizers = optimizers
         self.val_losses = []
         
-    def run_validation(self, train_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder):
+    def run_validation(self, val_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder):
         for epoch_nr in self.epochs:
             for learning_rate in self.learning_rates:
                 for optimizer in self.optimizers:
-                    val_loss = self.train(train_dataloader, encoder, decoder, epoch_nr, optimizer, learning_rate)
-                    self.val_losses.append([epoch_nr, learning_rate, str(optimizer), val_loss])
+                    val_loss = self.train(val_dataloader, encoder, decoder, epoch_nr, optimizer, learning_rate)
+                    self.val_losses.append([epoch_nr, learning_rate, optimizer, val_loss])
         return(self.choose_best())
 
     def choose_best(self):

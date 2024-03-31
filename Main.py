@@ -5,13 +5,14 @@ from Training import Training
 from Encoder_Decoder import EngEncoder, NlDecoder
 from Validation import Validation
 from torch import optim
+from Evaluation import Evaluation
 import pickle
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
-    
+    '''
     preprocesser = Preprocessing()
     # load English data
     filename_eng = 'europarl-v7.nl-en.en'
@@ -37,19 +38,18 @@ def main():
             paired_sent.append([eng_line, nl_line])
 
     preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")
-    
+    '''
     # load doc into memory
     with open("cleaned_pairs.txt", 'rb') as f:
         paired_sent = pickle.load(f)
 
-    paired_sent = paired_sent[:100]
-
-    
+    paired_sent = paired_sent[:200]
+    '''
     vocab_eng_temp = MakeVocab()
     vocab_nl_temp = MakeVocab()
     vocab_eng_temp.make_vocab(paired_sent, 0)
     vocab_nl_temp.make_vocab(paired_sent, 1)
-    
+    '''
 
     vocab_eng = MakeVocab()
     vocab_nl = MakeVocab()
@@ -72,15 +72,18 @@ def main():
     encoder = EngEncoder(vocab_eng.num_words, hidden_state_size).to(device)
     decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence+1).to(device)
     
-    validator = Validation(epochs=[2, 3], learning_rates=[0.001, 0.0025], optimizers=[optim.Adam, optim.Adadelta])
-    best_paramters = validator.run_validation(train_dataloader, encoder, decoder)
-    print(best_paramters)
+    #print("Validating on hyperparameters...")
+    #validator = Validation(epochs=[100, 200], learning_rates=[0.001, 0.0025], optimizers=[optim.Adam, optim.Adadelta])
+    #best_paramters = validator.run_validation(val_dataloader, encoder, decoder)
+    
+    print("Training on best parameters...")
+    trainer = Training()
+    trainer.train(train_dataloader, encoder, decoder, 10, optim.Adadelta, 0.0025, print_every=5, plot_every=5)
+    
+    evaluator = Evaluation()
+    evaluator.evaluateRandomly(encoder, decoder, paired_sent, vocab_eng, vocab_nl)
 
     '''
-    trainer = Training()
-    trainer.train(train_dataloader, encoder, decoder, 10, optim.Adam ,print_every=2, plot_every=2)
-    
-    
     torch.save(encoder.state_dict(), "nlp_final_project\models\encoder_df1000_batch64.pt")
     torch.save(decoder.state_dict(), "nlp_final_project\models\decoder_df1000_batch64.pt")
     '''
