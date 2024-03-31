@@ -8,11 +8,14 @@ from torch import optim
 from Evaluation import Evaluation
 import pickle
 import torch
+from Evaluation import Evaluation
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
     '''
+    preprocesser = Preprocessing()
+    
     preprocesser = Preprocessing()
     # load English data
     filename_eng = 'europarl-v7.nl-en.en'
@@ -62,8 +65,10 @@ def main():
     else:
         longest_sentence = vocab_nl.longest_sentence
 
-    print(vocab_eng.to_word(3))
-    print(vocab_nl.to_word(3))
+    #print(vocab_nl.num_words)
+    #print(vocab_eng.to_word(3))
+    #print(vocab_nl.to_word(3))
+    #print(longest_sentence)
 
     feat_extraction = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
     train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(20, paired_sent, longest_sentence)
@@ -88,10 +93,13 @@ def main():
     torch.save(decoder.state_dict(), "nlp_final_project\models\decoder_df1000_batch64.pt")
     '''
 
-    ''' encoder.load_state_dict(torch.load("models/encoder_df1000_batch64.pt"))
-    decoder.load_state_dict(torch.load("models/decoder_df1000_batch64.pt"))
+    encoder.load_state_dict(torch.load("models/encoder_df1000_batch20_new.pt"))
+    decoder.load_state_dict(torch.load("models/decoder_df1000_batch20_new.pt"))
     encoder.eval()
-    decoder.eval()'''
+    decoder.eval()
+
+    evaluator = Evaluation()
+    evaluator.evaluate(encoder, decoder, "resumption now in session", vocab_eng, vocab_nl)
 
 if __name__ == "__main__":
     main()

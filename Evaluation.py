@@ -16,12 +16,12 @@ class Evaluation():
 
             encoder_outputs, encoder_hidden = encoder(input_tensor)
             decoder_outputs, decoder_hidden, decoder_attn = decoder(encoder_outputs, encoder_hidden)
-
-            _, topi = decoder_outputs.topk(1)
+            _, topi = torch.topk(decoder_outputs,2)
             decoded_ids = topi.squeeze()
+            print(decoded_ids[:,1])
 
             decoded_words = []
-            for idx in decoded_ids:
+            for idx in decoded_ids[:,1]:
                 if idx.item() == self.EOS_token:
                     decoded_words.append('<EOS>')
                     break
