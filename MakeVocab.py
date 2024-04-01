@@ -6,7 +6,7 @@ class MakeVocab():
         self.word2index = {}
         self.word2count = {}
         self.index2word = {0: "SOS", 1: "EOS"}
-        self.num_words = 3
+        self.num_words = 2
         self.num_sentences = 0
         self.longest_sentence = 0
     

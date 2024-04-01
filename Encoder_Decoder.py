@@ -56,7 +56,7 @@ class Attention(nn.Module):
 
 
 class NlDecoder(nn.Module):
-    def __init__(self, hidden_state_size: int, nl_vocab_size: int, vocab_nl, longest_sentence: int, dropout_probability: float =0.1):
+    def __init__(self, hidden_state_size: int, nl_vocab_size: int, vocab_nl, longest_sentence: int, dropout_probability: float =0.05):
         super(NlDecoder, self).__init__()
 
         #using the embedding module to get word embeddings 
@@ -82,6 +82,7 @@ class NlDecoder(nn.Module):
         batch_size = encoder_outputs.size(0)
         # it also puts it to device here?
         decoder_input = torch.empty(batch_size, 1, dtype=torch.long, device=device).fill_(0) #0 is SOS_token
+        #print(decoder_input)
 
         #give the last hidden state from encoder to the decoder 
         decoder_hidden_state = encoder_hidden_state
@@ -110,12 +111,14 @@ class NlDecoder(nn.Module):
                 # Without teacher forcing: use its own predictions as the next input
                 _, topi = decoder_output.topk(1)
                 decoder_input = topi.squeeze(-1).detach()  # detach from history as input
+        #print("before concate\n")
         #print(decoder_outputs)
         #concatenate the decoder_outputs in one dimension
         decoder_outputs = torch.cat(decoder_outputs, dim=1)
 
         #get the last-dimension tensor after using log_softmax
         decoder_outputs = F.log_softmax(decoder_outputs, dim=-1)
+        #print("after concant\n")
         #print(decoder_outputs)
         #concatenate the attention in one dimension
         attentions = torch.cat(attentions, dim=1)
@@ -137,9 +140,10 @@ class NlDecoder(nn.Module):
         input_gru = torch.cat((dropout, context), dim=2)
 
         output, hidden_state = self.decoderrnn(input_gru, hidden)
-
+        
         #let the output go through the output layer
         output = self.output_layer(output)
+        
         return output, hidden_state, attn_weights
 
     

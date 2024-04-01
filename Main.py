@@ -46,7 +46,7 @@ def main():
     with open("cleaned_pairs.txt", 'rb') as f:
         paired_sent = pickle.load(f)
 
-    paired_sent = paired_sent[:200]
+    paired_sent = paired_sent[:100]
     '''
     vocab_eng_temp = MakeVocab()
     vocab_nl_temp = MakeVocab()
@@ -83,23 +83,23 @@ def main():
     
     print("Training on best parameters...")
     trainer = Training()
-    trainer.train(train_dataloader, encoder, decoder, 10, optim.Adadelta, 0.0025, print_every=5, plot_every=5)
+    trainer.train(train_dataloader, encoder, decoder, 5, optim.Adadelta, 0.0025, print_every=5, plot_every=5)
     
-    evaluator = Evaluation()
-    evaluator.evaluateRandomly(encoder, decoder, paired_sent, vocab_eng, vocab_nl)
+    evaluator = Evaluation(feat_extraction, encoder, decoder, vocab_eng, vocab_nl)
+    evaluator.evaluateRandomly(paired_sent)
+    print(evaluator.evaluate_all_bleu(paired_sent))
+
 
     '''
     torch.save(encoder.state_dict(), "nlp_final_project\models\encoder_df1000_batch64.pt")
     torch.save(decoder.state_dict(), "nlp_final_project\models\decoder_df1000_batch64.pt")
     '''
-
+    '''
     encoder.load_state_dict(torch.load("models/encoder_df1000_batch20_new.pt"))
     decoder.load_state_dict(torch.load("models/decoder_df1000_batch20_new.pt"))
     encoder.eval()
     decoder.eval()
-
-    evaluator = Evaluation()
-    evaluator.evaluate(encoder, decoder, "resumption now in session", vocab_eng, vocab_nl)
+    '''
 
 if __name__ == "__main__":
     main()

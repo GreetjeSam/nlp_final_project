@@ -6,39 +6,58 @@ from FeatureExtraction import FeatureExtraction
 from torchtext.data.metrics import bleu_score
 
 class Evaluation():
-    def __init__(self) -> None:
+    def __init__(self, feat_extractor: FeatureExtraction, encoder, decoder, vocab_eng, vocab_nl) -> None:
         self.EOS_token = 1
+        self.feat_extractor = feat_extractor
+        self.encoder = encoder
+        self.decoder = decoder
+        self.vocab_eng = vocab_eng
+        self.vocab_nl = vocab_nl
 
-    def evaluate(self, encoder, decoder, sentence, vocab_eng, vocab_nl):
+    def evaluate(self, sentence):
         with torch.no_grad():
-            feature_extractor = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
-            input_tensor = feature_extractor.tensorFromSentence(vocab_eng.word2index, sentence)
+            input_tensor = self.feat_extractor.tensorFromSentence(self.vocab_eng.word2index, sentence)
 
-            encoder_outputs, encoder_hidden = encoder(input_tensor)
-            decoder_outputs, decoder_hidden, decoder_attn = decoder(encoder_outputs, encoder_hidden)
-            _, topi = torch.topk(decoder_outputs,2)
+            encoder_outputs, encoder_hidden = self.encoder(input_tensor)
+            decoder_outputs, decoder_hidden, decoder_attn = self.decoder(encoder_outputs, encoder_hidden)
+            _, topi = torch.topk(decoder_outputs,1)
             decoded_ids = topi.squeeze()
-            print(decoded_ids[:,1])
+            #print(decoded_ids[:,1])
 
             decoded_words = []
-            for idx in decoded_ids[:,1]:
+            for idx in decoded_ids:
                 if idx.item() == self.EOS_token:
                     decoded_words.append('<EOS>')
                     break
-                decoded_words.append(vocab_nl.index2word[idx.item()])
+                decoded_words.append(self.vocab_nl.index2word[idx.item()])
         return decoded_words, decoder_attn
     
-    def evaluateRandomly(self, encoder, decoder, paired_sent, vocab_eng, vocab_nl, n=10):
+    def evaluate_all_bleu(self, paired_sentences: list):
+        all_output_words = []
+        bleu_reference = []
+        with torch.no_grad():
+            for pair in paired_sentences:
+                bleu_reference.append(pair[1].split())
+                output_words, _ = self.evaluate(pair[0])
+                all_output_words.append(output_words)
+        bleu_score = self.calc_bleu_score(all_output_words, bleu_reference)
+        return bleu_score
+    
+    def evaluateRandomly(self, paired_sent, n=10):
         for i in range(n):
             pair = random.choice(paired_sent)
             print('>', pair[0])
             print('=', pair[1])
-            output_words, _ = self.evaluate(encoder, decoder, pair[0], vocab_eng, vocab_nl)
+            output_words, _ = self.evaluate(pair[0])
             output_sentence = ' '.join(output_words)
             print('<', output_sentence)
             print('') 
 
-    def showAttention(self,input_sentence, output_words, attentions):
+    def calc_bleu_score(self, candidate_corpus, references_corpus):
+        return bleu_score(candidate_corpus, references_corpus)
+    
+'''
+    def showAttention(self, input_sentence, output_words, attentions):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         cax = ax.matshow(attentions.cpu().numpy(), cmap='bone')
@@ -56,13 +75,8 @@ class Evaluation():
         plt.show()
 
     def evaluateAndShowAttention(self, input_sentence):
-        output_words, attentions = self.evaluate(self.encoder, self.decoder, input_sentence, self.input_lang, self.output_lang)
+        output_words, attentions = self.evaluate(input_sentence)
         print('input =', input_sentence)
         print('output =', ' '.join(output_words))
         self.showAttention(input_sentence, output_words, attentions[0, :len(output_words), :])
-
-
-    def bleu_score(self, candidate_corpus, references_corpus):
-        candidate_corpus = [['My', 'full', 'pytorch', 'test'], ['No','Match']]
-        references_corpus = [[['My', 'full', 'pytorch', 'test'], ['Completely', 'Different']], [['No', 'Match']]]
-        return bleu_score(candidate_corpus, references_corpus)
+        '''
