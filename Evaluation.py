@@ -3,7 +3,7 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from FeatureExtraction import FeatureExtraction
-from torchtext.data.metrics import bleu_score
+#from torchtext.data.metrics import bleu_score
 
 class Evaluation():
     def __init__(self, feat_extractor: FeatureExtraction, encoder, decoder, vocab_eng, vocab_nl) -> None:

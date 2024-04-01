@@ -15,8 +15,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def main():
     '''
     preprocesser = Preprocessing()
-    
-    preprocesser = Preprocessing()
     # load English data
     filename_eng = 'europarl-v7.nl-en.en'
     eng_data = preprocesser.load_doc(filename_eng)
@@ -45,49 +43,46 @@ def main():
     # load doc into memory
     with open("cleaned_pairs.txt", 'rb') as f:
         paired_sent = pickle.load(f)
+        print("paired sentences loaded")
 
-    paired_sent = paired_sent[:100]
+    paired_sent = paired_sent[:200]
     '''
     vocab_eng_temp = MakeVocab()
     vocab_nl_temp = MakeVocab()
     vocab_eng_temp.make_vocab(paired_sent, 0)
     vocab_nl_temp.make_vocab(paired_sent, 1)
+    print('made vocabulary')
     '''
-
     vocab_eng = MakeVocab()
     vocab_nl = MakeVocab()
 
     vocab_eng.load_vocabularies(0)
     vocab_nl.load_vocabularies(1)
+    print('loaded vocabularies')
 
     if vocab_eng.longest_sentence > vocab_nl.longest_sentence:
         longest_sentence = vocab_eng.longest_sentence
     else:
         longest_sentence = vocab_nl.longest_sentence
 
-    #print(vocab_nl.num_words)
-    #print(vocab_eng.to_word(3))
-    #print(vocab_nl.to_word(3))
-    #print(longest_sentence)
-
     feat_extraction = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
-    train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(20, paired_sent, longest_sentence)
+    train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(200, paired_sent, longest_sentence)
     
     hidden_state_size = 128
     encoder = EngEncoder(vocab_eng.num_words, hidden_state_size).to(device)
     decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence+1).to(device)
     
-    #print("Validating on hyperparameters...")
-    #validator = Validation(epochs=[100, 200], learning_rates=[0.001, 0.0025], optimizers=[optim.Adam, optim.Adadelta])
-    #best_paramters = validator.run_validation(val_dataloader, encoder, decoder)
+    print("Validating on hyperparameters...")
+    validator = Validation(epochs=[30, 40], learning_rates=[0.001, 0.0025], optimizers=[optim.Adam])
+    best_paramters = validator.run_validation(val_dataloader, vocab_eng, vocab_nl, hidden_state_size, longest_sentence+1)
     
     print("Training on best parameters...")
     trainer = Training()
-    trainer.train(train_dataloader, encoder, decoder, 5, optim.Adadelta, 0.0025, print_every=5, plot_every=5)
+    trainer.train(train_dataloader, encoder, decoder, best_paramters[0], best_paramters[1], best_paramters[2], print_every=5, plot_every=5)
     
     evaluator = Evaluation(feat_extraction, encoder, decoder, vocab_eng, vocab_nl)
     evaluator.evaluateRandomly(paired_sent)
-    print(evaluator.evaluate_all_bleu(paired_sent))
+    #print(evaluator.evaluate_all_bleu(paired_sent))
 
 
     '''
