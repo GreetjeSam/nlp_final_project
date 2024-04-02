@@ -45,7 +45,6 @@ class FeatureExtraction():
         train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(all_data, [train_size, val_size, test_size])
 
 
-        #train_sampler = RandomSampler(train_data)
         train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
         val_dataloader = DataLoader(val_dataset, shuffle=False, batch_size=batch_size)
         test_dataloader = DataLoader(test_dataset, shuffle=False, batch_size=batch_size)

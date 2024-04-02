@@ -3,6 +3,7 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from FeatureExtraction import FeatureExtraction
+from torch.utils.data import dataloader
 from torchtext.data.metrics import bleu_score
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -16,9 +17,9 @@ class Evaluation():
         self.vocab_eng = vocab_eng
         self.vocab_nl = vocab_nl
 
-    def evaluate(self, sentence):
+    def evaluate(self, input_tensor):
         with torch.no_grad():
-            input_tensor = self.feat_extractor.tensorFromSentence(self.vocab_eng.word2index, sentence).to(device)
+            #input_tensor = self.feat_extractor.tensorFromSentence(self.vocab_eng.word2index, sentence).to(device)
 
             encoder_outputs, encoder_hidden = self.encoder(input_tensor)
             decoder_outputs, decoder_hidden, decoder_attn = self.decoder(encoder_outputs, encoder_hidden)
@@ -34,16 +35,33 @@ class Evaluation():
                 decoded_words.append(self.vocab_nl.index2word[idx.item()])
         return decoded_words, decoder_attn
     
-    def evaluate_all_bleu(self, paired_sentences: list):
+    def to_words(self, tensor):
+        sentence = []
+        tensor = tensor.tolist()
+        #print(tensor)
+        for index in tensor[0]:
+            if index != 0:
+                sentence.append(str(self.vocab_nl.to_word(index)))
+        sentence = [sentence]
+        return sentence
+    
+    def evaluate_all_bleu(self, test_dataloader: dataloader):
         all_output_words = []
-        bleu_reference = []
+        references = []
         with torch.no_grad():
-            for pair in paired_sentences:
-                bleu_reference.append(pair[1].split())
-                output_words, _ = self.evaluate(pair[0])
-                all_output_words.append(output_words)
-        bleu_score = self.calc_bleu_score(all_output_words, bleu_reference)
-        return bleu_score
+            for data_batch in test_dataloader:
+                input_tensor, output_tensor = data_batch
+                input_tensor = input_tensor.to(device)
+                output_tensor = output_tensor.to(device)
+                for tensor_in, tensor_target in zip(input_tensor, output_tensor):
+                    #print(tensor_target)
+                    references.append(self.to_words(tensor_target.view(1, -1)))
+                    output_words, _ = self.evaluate(tensor_in.view(1, -1))
+                    output_sentence = ' '.join(output_words)
+                    print('<', output_sentence)
+                    all_output_words.append(output_words)
+        bleu = self.calc_bleu_score(all_output_words, references)
+        return bleu
     
     def evaluateRandomly(self, paired_sent, n=10):
         for i in range(n):
@@ -56,6 +74,8 @@ class Evaluation():
             print('') 
 
     def calc_bleu_score(self, candidate_corpus, references_corpus):
+        print(references_corpus[:5])
+        print(candidate_corpus[:5])
         return bleu_score(candidate_corpus, references_corpus)
     
 '''
