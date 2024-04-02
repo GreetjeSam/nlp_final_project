@@ -73,7 +73,7 @@ def main():
     decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence+1).to(device)
     
     print("Validating on hyperparameters...")
-    validator = Validation(epochs=[30, 40], learning_rates=[0.001, 0.0025], optimizers=[optim.Adam])
+    validator = Validation(epochs=[25], learning_rates=[0.0015, 0.0025, 0.003], optimizers=[optim.Adam])
     best_paramters = validator.run_validation(val_dataloader, vocab_eng, vocab_nl, hidden_state_size, longest_sentence+1)
     
     print("Training on best parameters...")

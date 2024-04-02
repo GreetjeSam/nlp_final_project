@@ -5,6 +5,8 @@ import matplotlib.ticker as ticker
 from FeatureExtraction import FeatureExtraction
 #from torchtext.data.metrics import bleu_score
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class Evaluation():
     def __init__(self, feat_extractor: FeatureExtraction, encoder, decoder, vocab_eng, vocab_nl) -> None:
         self.EOS_token = 1
@@ -16,16 +18,16 @@ class Evaluation():
 
     def evaluate(self, sentence):
         with torch.no_grad():
-            input_tensor = self.feat_extractor.tensorFromSentence(self.vocab_eng.word2index, sentence)
+            input_tensor = self.feat_extractor.tensorFromSentence(self.vocab_eng.word2index, sentence).to(device)
 
             encoder_outputs, encoder_hidden = self.encoder(input_tensor)
             decoder_outputs, decoder_hidden, decoder_attn = self.decoder(encoder_outputs, encoder_hidden)
-            _, topi = torch.topk(decoder_outputs,1)
+            _, topi = torch.topk(decoder_outputs,2)
             decoded_ids = topi.squeeze()
             #print(decoded_ids[:,1])
 
             decoded_words = []
-            for idx in decoded_ids:
+            for idx in decoded_ids[:,1]:
                 if idx.item() == self.EOS_token:
                     decoded_words.append('<EOS>')
                     break
