@@ -68,7 +68,7 @@ def main():
     feat_extraction = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
     train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(200, paired_sent, longest_sentence)
     
-    hidden_state_size = 128
+    hidden_state_size = 256
     encoder = EngEncoder(vocab_eng.num_words, hidden_state_size).to(device)
     decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence+1).to(device)
     
