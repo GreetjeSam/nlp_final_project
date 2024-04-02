@@ -74,8 +74,6 @@ class Evaluation():
             print('') 
 
     def calc_bleu_score(self, candidate_corpus, references_corpus):
-        print(references_corpus[:5])
-        print(candidate_corpus[:5])
         return bleu_score(candidate_corpus, references_corpus)
     
 '''

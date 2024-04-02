@@ -8,7 +8,7 @@ import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-plt.switch_backend('agg')
+#plt.switch_backend('agg')
 import matplotlib.ticker as ticker
 import numpy as np
 import torch
@@ -31,13 +31,10 @@ class Training():
         remaining = estimate - seconds
         return '%s (- %s)' % (self.asMinutes(seconds), self.asMinutes(remaining))
     
-    def showPlot(self, points: list):
+    def showPlot(self, points: list, plot_name):
         plt.figure()
-        fig, ax = plt.subplots()
-        # this locator puts ticks at regular intervals
-        loc = ticker.MultipleLocator(base=0.2)
-        ax.yaxis.set_major_locator(loc)
         plt.plot(points)
+        plt.savefig(plot_name)
     
     def train_epoch(self, train_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder, encoder_optimizer, 
                     decoder_optimizer, criterion: CrossEntropyLoss):
@@ -71,7 +68,7 @@ class Training():
 
     # hyper parameter tuning: nr epochs, learning rate, the adam optimizer
     def train(self, train_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder, n_epochs: int, 
-              optimizer: (optim.Adam|optim.Adadelta), learning_rate: float =0.001,
+              optimizer: (optim.Adam|optim.Adadelta), learning_rate: float =0.001, plot_name: str = 'plot',
                print_every: int =100, plot_every: int =100):
         start = time.time()
         plot_losses = []
@@ -104,5 +101,5 @@ class Training():
                 plot_losses.append(plot_loss_avg)
                 plot_loss_total = 0
 
-        self.showPlot(plot_losses)
+        self.showPlot(plot_losses, plot_name)
         return final_loss

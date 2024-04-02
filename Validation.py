@@ -15,6 +15,7 @@ class Validation(Training):
         self.val_losses = []
         
     def run_validation(self, val_dataloader: DataLoader, vocab_eng, vocab_nl, hidden_state_size, longest_sentence):
+        index = 0
         for epoch_nr in self.epochs:
             encoder = EngEncoder(vocab_eng.num_words, hidden_state_size).to(device)
             decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence).to(device)
@@ -24,7 +25,8 @@ class Validation(Training):
                 for optimizer in self.optimizers:
                     encoder = EngEncoder(vocab_eng.num_words, hidden_state_size).to(device)
                     decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence).to(device)
-                    val_loss = self.train(val_dataloader, encoder, decoder, epoch_nr, optimizer, learning_rate)
+                    val_loss = self.train(val_dataloader, encoder, decoder, epoch_nr, optimizer, learning_rate, plot_name="validate"+str(index)+".png")
+                    index += 1
                     self.val_losses.append([epoch_nr, optimizer, learning_rate, val_loss])
         return(self.choose_best())
 
@@ -38,6 +40,6 @@ class Validation(Training):
         return best_run
 
     def train(self, train_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder, n_epochs: int, 
-              optimizer: optim.Adam | optim.Adadelta, learning_rate: float = 0.001, print_every: int = 5, plot_every: int = 5):
-        return super().train(train_dataloader, encoder, decoder, n_epochs, optimizer, learning_rate, print_every, plot_every)
+              optimizer: optim.Adam | optim.Adadelta, learning_rate: float = 0.001, plot_name = 'plot', print_every: int = 1, plot_every: int = 1):
+        return super().train(train_dataloader, encoder, decoder, n_epochs, optimizer, learning_rate, plot_name, print_every, plot_every)
 

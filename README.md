@@ -13,3 +13,8 @@ your project.
 Please download the data from: https://www.statmt.org/europarl/
 The dataset we used is called: parallel corpus Dutch-English and is under the "Download" section.
 We unfortuanately could not push it to GitHub, because the dataset is too large.
+
+numpy
+torch
+matplotlib
+torchtext
