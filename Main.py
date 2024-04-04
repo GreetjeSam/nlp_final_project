@@ -45,7 +45,7 @@ def main():
         paired_sent = pickle.load(f)
         print("paired sentences loaded")
 
-    paired_sent = paired_sent[:100]
+    paired_sent = paired_sent[:5000]
     '''
     vocab_eng_temp = MakeVocab()
     vocab_nl_temp = MakeVocab()
@@ -66,19 +66,19 @@ def main():
         longest_sentence = vocab_nl.longest_sentence
 
     feat_extraction = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
-    train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(20, paired_sent, longest_sentence)
+    train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(150, paired_sent, longest_sentence)
     
     hidden_state_size = 256
     encoder = EngEncoder(vocab_eng.num_words, hidden_state_size).to(device)
     decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence+1).to(device)
     
     print("Validating on hyperparameters...")
-    validator = Validation(epochs=[5], learning_rates=[0.003], optimizers=[optim.Adam])
+    validator = Validation(epochs=[90, 100], learning_rates=[0.002, 0.0025, 0.003], optimizers=[optim.Adam])
     best_paramters = validator.run_validation(val_dataloader, vocab_eng, vocab_nl, hidden_state_size, longest_sentence+1)
     
     print("Training on best parameters...")
     trainer = Training()
-    trainer.train(train_dataloader, encoder, decoder, best_paramters[0], best_paramters[1], best_paramters[2], plot_name="trainPlot.png" ,print_every=1, plot_every=1)
+    trainer.train(train_dataloader, encoder, decoder, best_paramters[0], best_paramters[1], best_paramters[2], plot_name="trainPlot.png", print_every=1, plot_every=1)
     
     evaluator = Evaluation(feat_extraction, encoder, decoder, vocab_eng, vocab_nl)
     #evaluator.evaluateRandomly(paired_sent)
