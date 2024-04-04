@@ -31,11 +31,6 @@ class Training():
         remaining = estimate - seconds
         return '%s (- %s)' % (self.asMinutes(seconds), self.asMinutes(remaining))
     
-    def showPlot(self, points: list, plot_name):
-        plt.figure()
-        plt.plot(points)
-        plt.savefig(plot_name)
-    
     def train_epoch(self, train_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder, encoder_optimizer, 
                     decoder_optimizer, criterion: CrossEntropyLoss):
         total_loss = 0
@@ -67,16 +62,19 @@ class Training():
         return total_loss / len(train_dataloader)
 
     # hyper parameter tuning: nr epochs, learning rate, the adam optimizer
-    def train(self, train_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder, n_epochs: int, 
+    def train(self, train_dataloader: DataLoader, validation_loader: DataLoader,encoder: EngEncoder, decoder: NlDecoder, n_epochs: int, 
               optimizer: (optim.Adam|optim.Adadelta), learning_rate: float =0.001, plot_name: str = 'plot',
                print_every: int =100, plot_every: int =100):
         start = time.time()
-        plot_losses = []
         print_loss_total = 0  # Reset every print_every
         plot_loss_total = 0  # Reset every plot_every
+        print_vloss = 0
+        plot_vloss = 0
+        plot_train_losses = []
+        plot_val_losses = []
 
-        encoder_optimizer = optimizer(mod.parameters(encoder), lr=learning_rate)
-        decoder_optimizer = optimizer(mod.parameters(decoder), lr=learning_rate)
+        encoder_optimizer = optimizer(mod.parameters(encoder), lr=learning_rate, weight_decay=1e-3)
+        decoder_optimizer = optimizer(mod.parameters(decoder), lr=learning_rate, weight_decay=1e-3)
         
         # Using the cross entropy loss
         criterion = nn.CrossEntropyLoss()
@@ -86,6 +84,19 @@ class Training():
                                encoder_optimizer, decoder_optimizer, criterion)
             print_loss_total += loss
             plot_loss_total += loss
+
+            with torch.no_grad():
+                for i, vdata in enumerate(validation_loader):
+                    input_tensor, target_tensor = vdata
+                    encoder_outputs, encoder_hidden = encoder(input_tensor)
+                    decoder_outputs, _, _, = decoder(encoder_outputs, encoder_hidden, target_tensor)
+                    vloss = criterion(decoder_outputs.view(-1, decoder_outputs.size(-1)),
+                             target_tensor.view(-1))
+                    print_vloss += vloss
+                    plot_vloss += vloss
+
+            final_vloss = print_vloss / (i + 1)
+            print("avg val loss", final_vloss.item())
 
             if epoch == n_epochs:
                 final_loss = print_loss_total / print_every
@@ -98,8 +109,23 @@ class Training():
             
             if epoch % plot_every == 0:
                 plot_loss_avg = plot_loss_total / plot_every
-                plot_losses.append(plot_loss_avg)
+                plot_vloss_avg = final_vloss
+                plot_train_losses.append(plot_loss_avg)
+                plot_val_losses.append(plot_vloss_avg.item())
                 plot_loss_total = 0
+                plot_vloss = 0
 
-        self.showPlot(plot_losses, plot_name)
+        print(plot_train_losses, plot_val_losses)
+        self.showPlot(n_epochs, plot_train_losses, plot_val_losses, plot_name)
         return final_loss
+    
+    def showPlot(self, epochs, train_loss: list, val_loss: list, plot_name):
+        #plt.figure()
+        epochs = range(1, epochs+1)
+        plt.plot(epochs, val_loss, 'b', label='Validation Loss')
+        plt.plot(epochs, train_loss, 'r', label='Training Loss')
+        plt.title('Training and Validation Loss')        
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.savefig(plot_name)

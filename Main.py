@@ -45,14 +45,14 @@ def main():
         paired_sent = pickle.load(f)
         print("paired sentences loaded")
 
-    paired_sent = paired_sent[:100]
-    '''
-    vocab_eng_temp = MakeVocab()
+    paired_sent = paired_sent[:1000]
+    
+    '''vocab_eng_temp = MakeVocab()
     vocab_nl_temp = MakeVocab()
     vocab_eng_temp.make_vocab(paired_sent, 0)
     vocab_nl_temp.make_vocab(paired_sent, 1)
-    print('made vocabulary')
-    '''
+    print('made vocabulary')'''
+    
     vocab_eng = MakeVocab()
     vocab_nl = MakeVocab()
 
@@ -64,26 +64,27 @@ def main():
         longest_sentence = vocab_eng.longest_sentence
     else:
         longest_sentence = vocab_nl.longest_sentence
+    print(longest_sentence)
 
     feat_extraction = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
-    train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(20, paired_sent, longest_sentence)
-    
+    train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(8, paired_sent, longest_sentence)
+    print("dataloaders created")
+
     hidden_state_size = 256
     encoder = EngEncoder(vocab_eng.num_words, hidden_state_size).to(device)
     decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence+1).to(device)
     
-    print("Validating on hyperparameters...")
-    validator = Validation(epochs=[5], learning_rates=[0.003], optimizers=[optim.Adam])
-    best_paramters = validator.run_validation(val_dataloader, vocab_eng, vocab_nl, hidden_state_size, longest_sentence+1)
+    #print("Validating on hyperparameters...")
+    #validator = Validation(epochs=[5], learning_rates=[0.003], optimizers=[optim.Adam])
+    #best_paramters = validator.run_validation(val_dataloader, vocab_eng, vocab_nl, hidden_state_size, longest_sentence+1)
     
-    print("Training on best parameters...")
+    print("Training and validating...")
     trainer = Training()
-    trainer.train(train_dataloader, encoder, decoder, best_paramters[0], best_paramters[1], best_paramters[2], plot_name="trainPlot.png" ,print_every=1, plot_every=1)
+    trainer.train(train_dataloader, val_dataloader, encoder, decoder, 3, optim.Adam, 0.001, plot_name="lossplotsmall8.png" ,print_every=1, plot_every=1)
     
-    evaluator = Evaluation(feat_extraction, encoder, decoder, vocab_eng, vocab_nl)
+    #evaluator = Evaluation(feat_extraction, encoder, decoder, vocab_eng, vocab_nl)
     #evaluator.evaluateRandomly(paired_sent)
-    print(evaluator.evaluate_all_bleu(test_dataloader))
-
+    #print(evaluator.evaluate_all_bleu(test_dataloader))
 
     '''
     torch.save(encoder.state_dict(), "nlp_final_project\models\encoder_df1000_batch64.pt")
