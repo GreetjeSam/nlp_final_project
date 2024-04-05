@@ -73,8 +73,8 @@ class Training():
         plot_train_losses = []
         plot_val_losses = []
 
-        encoder_optimizer = optimizer(mod.parameters(encoder), lr=learning_rate, weight_decay=1e-3)
-        decoder_optimizer = optimizer(mod.parameters(decoder), lr=learning_rate, weight_decay=1e-3)
+        encoder_optimizer = optimizer(mod.parameters(encoder), lr=learning_rate, weight_decay=1e-6)
+        decoder_optimizer = optimizer(mod.parameters(decoder), lr=learning_rate, weight_decay=1e-6)
         
         # Using the cross entropy loss
         criterion = nn.CrossEntropyLoss()
@@ -93,9 +93,9 @@ class Training():
                     vloss = criterion(decoder_outputs.view(-1, decoder_outputs.size(-1)),
                              target_tensor.view(-1))
                     print_vloss += vloss
-                    plot_vloss += vloss
 
             final_vloss = print_vloss / (i + 1)
+            print_vloss = 0
             print("avg val loss", final_vloss.item())
 
             if epoch == n_epochs:
@@ -113,7 +113,6 @@ class Training():
                 plot_train_losses.append(plot_loss_avg)
                 plot_val_losses.append(plot_vloss_avg.item())
                 plot_loss_total = 0
-                plot_vloss = 0
 
         print(plot_train_losses, plot_val_losses)
         self.showPlot(n_epochs, plot_train_losses, plot_val_losses, plot_name)
