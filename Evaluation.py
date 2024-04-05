@@ -57,8 +57,6 @@ class Evaluation():
                     #print(tensor_target)
                     references.append(self.to_words(tensor_target.view(1, -1)))
                     output_words, _ = self.evaluate(tensor_in.view(1, -1))
-                    output_sentence = ' '.join(output_words)
-                    print('<', output_sentence)
                     all_output_words.append(output_words)
         bleu = self.calc_bleu_score(all_output_words, references)
         return bleu
