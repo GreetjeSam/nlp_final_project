@@ -30,7 +30,7 @@ class Evaluation():
             decoded_words = []
             for idx in decoded_ids:
                 if idx.item() == self.EOS_token:
-                    decoded_words.append('<EOS>')
+                    decoded_words.append('EOS')
                     break
                 decoded_words.append(self.vocab_nl.index2word[idx.item()])
         return decoded_words, decoder_attn
@@ -48,6 +48,7 @@ class Evaluation():
     def evaluate_all_bleu(self, test_dataloader: dataloader):
         all_output_words = []
         references = []
+        index = 0
         with torch.no_grad():
             for data_batch in test_dataloader:
                 input_tensor, output_tensor = data_batch
@@ -58,6 +59,11 @@ class Evaluation():
                     references.append(self.to_words(tensor_target.view(1, -1)))
                     output_words, _ = self.evaluate(tensor_in.view(1, -1))
                     all_output_words.append(output_words)
+                    if index < 10:
+                        print("=", ' '.join(references[index][0]))
+                        output_sentence = ' '.join(output_words)
+                        print('<', output_sentence)
+                    index += 1
         bleu = self.calc_bleu_score(all_output_words, references)
         return bleu
     

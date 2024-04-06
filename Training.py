@@ -88,6 +88,8 @@ class Training():
             with torch.no_grad():
                 for i, vdata in enumerate(validation_loader):
                     input_tensor, target_tensor = vdata
+                    input_tensor = input_tensor.to(device)
+                    target_tensor = target_tensor.to(device)
                     encoder_outputs, encoder_hidden = encoder(input_tensor)
                     decoder_outputs, _, _, = decoder(encoder_outputs, encoder_hidden, target_tensor)
                     vloss = criterion(decoder_outputs.view(-1, decoder_outputs.size(-1)),
