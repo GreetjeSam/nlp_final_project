@@ -22,7 +22,6 @@ class FeatureExtraction():
         return torch.tensor(indexes, dtype=torch.long).view(1, -1)
 
     def get_dataloader(self, batch_size, paired_sent, longest_sentence):
-
         n = len(paired_sent)
         input_ids = np.zeros((n, longest_sentence+1), dtype=np.int32)
         target_ids = np.zeros((n, longest_sentence+1), dtype=np.int32)
@@ -33,21 +32,18 @@ class FeatureExtraction():
             tgt_ids.append(self.EOS_token)
             input_ids[index, :len(inp_ids)] = inp_ids
             target_ids[index, :len(tgt_ids)] = tgt_ids
-        
 
-        all_data = TensorDataset(torch.LongTensor(input_ids),
-                               torch.LongTensor(target_ids))
+        all_data = TensorDataset(torch.LongTensor(input_ids),torch.LongTensor(target_ids))
     
         train_size = int(0.64 * len(all_data))
         val_size = int(0.16 * len(all_data))
         test_size = len(all_data) - train_size - val_size
         
+        #train, val, test split
         train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(all_data, [train_size, val_size, test_size])
-
 
         train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
         val_dataloader = DataLoader(val_dataset, shuffle=False, batch_size=batch_size)
         test_dataloader = DataLoader(test_dataset, shuffle=False, batch_size=batch_size)
 
         return train_dataloader, val_dataloader, test_dataloader
-        

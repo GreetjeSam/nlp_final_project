@@ -12,7 +12,9 @@ from Evaluation import Evaluation
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
-    '''
+    
+
+    '''#run this code block once to create the cleaned_pairs.txt file, afterwards comment it out
     preprocesser = Preprocessing()
     # load English data
     filename_eng = 'europarl-v7.nl-en.en'
@@ -33,37 +35,38 @@ def main():
     for eng_line, nl_line in zip(sentences_eng, sentences_nl):
         sen_nl = nl_line.split()
         sen_eng = eng_line.split()
-
+        #remove sentences that are too long or too short
         if len(sen_nl) < 128 and len(sen_eng) < 128 and len(sen_nl) > 0 and len(sen_eng) > 0:
             paired_sent.append([eng_line, nl_line])
 
-    preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")
-    '''
-    # load doc into memory
+    preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")'''
+    
+
+    '''# load doc into memory
     with open("cleaned_pairs.txt", 'rb') as f:
         paired_sent = pickle.load(f)
-        #print("paired sentences loaded")
-
-    paired_sent = paired_sent[:200]
+        print("paired sentences loaded")
+    # limit the number of sentences to your liking, to reduce training time
+    paired_sent = paired_sent[:200]'''
     
+    '''# run this to make new vocabularies, which will be saved in the current directory
     vocab_eng_temp = MakeVocab()
     vocab_nl_temp = MakeVocab()
     vocab_eng_temp.make_vocab(paired_sent, 0)
     vocab_nl_temp.make_vocab(paired_sent, 1)
-    print('made vocabulary')
+    print('made vocabulary')'''
     
+    '''#run this after first creating the vocabularies to load them
     vocab_eng = MakeVocab()
     vocab_nl = MakeVocab()
-
     vocab_eng.load_vocabularies(0)
     vocab_nl.load_vocabularies(1)
-    #print('loaded vocabularies')
+    print('Loaded vocabularies...')
 
     if vocab_eng.longest_sentence > vocab_nl.longest_sentence:
         longest_sentence = vocab_eng.longest_sentence
     else:
         longest_sentence = vocab_nl.longest_sentence
-    #print(longest_sentence)
 
     feat_extraction = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
     train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(20, paired_sent, longest_sentence)
@@ -77,19 +80,7 @@ def main():
     trainer.train(train_dataloader, val_dataloader, encoder, decoder, 5, optim.Adam, 0.001, plot_name="lossplot.png" ,print_every=1, plot_every=1)
     
     evaluator = Evaluation(feat_extraction, encoder, decoder, vocab_eng, vocab_nl)
-    #evaluator.evaluateRandomly(paired_sent)
-    print(evaluator.evaluate_all_bleu(test_dataloader))
-
-    '''
-    torch.save(encoder.state_dict(), "nlp_final_project\models\encoder_df1000_batch64.pt")
-    torch.save(decoder.state_dict(), "nlp_final_project\models\decoder_df1000_batch64.pt")
-    '''
-    '''
-    encoder.load_state_dict(torch.load("models/encoder_df1000_batch20_new.pt"))
-    decoder.load_state_dict(torch.load("models/decoder_df1000_batch20_new.pt"))
-    encoder.eval()
-    decoder.eval()
-    '''
+    print(evaluator.evaluate_all_bleu(test_dataloader))'''
 
 if __name__ == "__main__":
     main()

@@ -16,9 +16,8 @@ class EngEncoder(nn.Module):
         self.encoderlstm = nn.LSTM(hidden_state_size,hidden_state_size,batch_first=True)
         self.encoderlstm2 = nn.LSTM(hidden_state_size,hidden_state_size,batch_first=True)
 
-        #self.encoderrnn2 = nn.GRU(hidden_state_size,hidden_state_size,batch_first=True)
+        #using the batch normalization to normalize the tensor
         self.batch_norm = nn.BatchNorm1d(longest_sentence)
-
 
         #using the dropout to zero the elements in the tensor with the dropout_probability
         self.dropout = nn.Dropout(dropout_probability)
@@ -74,12 +73,13 @@ class NlDecoder(nn.Module):
 
         #using the GRU RNN to the embedded input which the size is double the hidden_state_size
         self.decoderrnn = nn.GRU(2 * hidden_state_size, hidden_state_size, batch_first=True)
-        #self.decoderrnn2 = nn.GRU(hidden_state_size, hidden_state_size, batch_first=True)
 
         #using the output layer to get the output
         self.output_layer = nn.Linear(hidden_state_size, nl_vocab_size)
 
+        #using the batch normalization to normalize the tensor
         self.batch_norm = nn.BatchNorm1d(1)
+
         #using the dropout to zero the elements in the tensor with the dropout_probability
         self.dropout = nn.Dropout(dropout_probability)
         self.vocab_nl = vocab_nl
@@ -147,14 +147,11 @@ class NlDecoder(nn.Module):
 
         # do batch normalization
         output2 = self.batch_norm(output1)
+
         # do dropout
         output2 = self.dropout(output2)
-
 
         #let the output go through the output layer
         output = self.output_layer(output2)
         
         return output, hidden_state1, attn_weights
-
-    
-
