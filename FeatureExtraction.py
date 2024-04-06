@@ -4,6 +4,9 @@ import torch
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler
 
+# the following source was used to build this class: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
+# the train/validation/test split was done ourselves.
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class FeatureExtraction():
@@ -33,7 +36,6 @@ class FeatureExtraction():
             tgt_ids.append(self.EOS_token)
             input_ids[index, :len(inp_ids)] = inp_ids
             target_ids[index, :len(tgt_ids)] = tgt_ids
-        
 
         all_data = TensorDataset(torch.LongTensor(input_ids),
                                torch.LongTensor(target_ids))
@@ -43,7 +45,6 @@ class FeatureExtraction():
         test_size = len(all_data) - train_size - val_size
         
         train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(all_data, [train_size, val_size, test_size])
-
 
         train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
         val_dataloader = DataLoader(val_dataset, shuffle=False, batch_size=batch_size)

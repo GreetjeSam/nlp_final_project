@@ -13,6 +13,8 @@ import matplotlib.ticker as ticker
 import numpy as np
 import torch
 
+# The following source was used to calculate the validation loss: https://pytorch.org/tutorials/beginner/introyt/trainingyt.html
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Training():
