@@ -3,7 +3,6 @@ from FeatureExtraction import FeatureExtraction
 from MakeVocab import MakeVocab
 from Training import Training
 from Encoder_Decoder import EngEncoder, NlDecoder
-from Validation import Validation
 from torch import optim
 from Evaluation import Evaluation
 import pickle
@@ -72,10 +71,6 @@ def main():
     hidden_state_size = 128
     encoder = EngEncoder(vocab_eng.num_words, hidden_state_size, longest_sentence+1).to(device)
     decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence+1).to(device)
-    
-    #print("Validating on hyperparameters...")
-    #validator = Validation(epochs=[5], learning_rates=[0.003], optimizers=[optim.Adam])
-    #best_paramters = validator.run_validation(val_dataloader, vocab_eng, vocab_nl, hidden_state_size, longest_sentence+1)
     
     print("Training and validating...")
     trainer = Training()
