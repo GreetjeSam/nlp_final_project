@@ -44,7 +44,7 @@ def main():
         paired_sent = pickle.load(f)
         #print("paired sentences loaded")
 
-    paired_sent = paired_sent[:5000]
+    paired_sent = paired_sent[:200]
     
     vocab_eng_temp = MakeVocab()
     vocab_nl_temp = MakeVocab()
@@ -66,7 +66,7 @@ def main():
     #print(longest_sentence)
 
     feat_extraction = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
-    train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(256, paired_sent, longest_sentence)
+    train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(20, paired_sent, longest_sentence)
 
     hidden_state_size = 128
     encoder = EngEncoder(vocab_eng.num_words, hidden_state_size, longest_sentence+1).to(device)
@@ -74,7 +74,7 @@ def main():
     
     print("Training and validating...")
     trainer = Training()
-    trainer.train(train_dataloader, val_dataloader, encoder, decoder, 15, optim.Adam, 0.001, plot_name="lossplot.png" ,print_every=1, plot_every=1)
+    trainer.train(train_dataloader, val_dataloader, encoder, decoder, 5, optim.Adam, 0.001, plot_name="lossplot.png" ,print_every=1, plot_every=1)
     
     evaluator = Evaluation(feat_extraction, encoder, decoder, vocab_eng, vocab_nl)
     #evaluator.evaluateRandomly(paired_sent)
