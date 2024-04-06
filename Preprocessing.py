@@ -47,5 +47,3 @@ class Preprocessing():
         with open(filename, 'wb') as f:
             pickle.dump(paired_sent, f)
         print('Saved: %s' % filename)
-
-

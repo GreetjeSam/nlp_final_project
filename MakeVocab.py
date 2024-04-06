@@ -1,6 +1,5 @@
 import pickle
 
-
 class MakeVocab():
     def __init__(self) -> None:
         self.word2index = {}
@@ -66,7 +65,6 @@ class MakeVocab():
             self.num_words = nwords_nsetns_Lsent[0]
             self.num_sentences = nwords_nsetns_Lsent[1]
             self.longest_sentence = nwords_nsetns_Lsent[2]
-
 
     def to_word(self, index):
         return self.index2word[index]

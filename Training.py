@@ -6,11 +6,7 @@ from torch.nn import Module as mod
 from torch.nn import CrossEntropyLoss
 import torch.nn as nn
 from torch import optim
-import torch.nn.functional as F
 import matplotlib.pyplot as plt
-#plt.switch_backend('agg')
-import matplotlib.ticker as ticker
-import numpy as np
 import torch
 
 # The following source was used to calculate the validation loss: https://pytorch.org/tutorials/beginner/introyt/trainingyt.html
