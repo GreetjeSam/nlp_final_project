@@ -2,6 +2,7 @@ import string
 import re
 import pickle
 from unicodedata import normalize
+
 # The following source was used for the clean_lines method: https://machinelearningmastery.com/prepare-french-english-dataset-machine-translation/
 
 class Preprocessing():

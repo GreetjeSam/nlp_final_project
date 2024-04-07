@@ -7,6 +7,9 @@ from torch.utils.data import dataloader
 from torch.nn import CrossEntropyLoss
 from torchtext.data.metrics import bleu_score
 
+# The source for the evaluate method was inspired, but adapted, by: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
+# The rest of the class was a little inspired by the same source, but written ourselves.
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Evaluation():
