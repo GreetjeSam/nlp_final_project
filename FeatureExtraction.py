@@ -5,7 +5,7 @@ import numpy as np
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler
 
 # the following source was used to build this class: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
-# the train/validation/test split was done ourselves.
+# the train/validation/test split for the data loaders is inspired by the following source: https://www.d2l.ai/chapter_introduction/index.html
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

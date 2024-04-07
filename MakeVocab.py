@@ -1,5 +1,8 @@
 import pickle
 
+# the source for everything except for the save and load vocabularies is: 
+# https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
+
 class MakeVocab():
     def __init__(self) -> None:
         self.word2index = {}

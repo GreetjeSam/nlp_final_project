@@ -9,6 +9,7 @@ from torch import optim
 import matplotlib.pyplot as plt
 import torch
 
+# The following source was used to create the majority of this class: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
 # The following source was used to calculate the validation loss: https://pytorch.org/tutorials/beginner/introyt/trainingyt.html
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -67,7 +68,6 @@ class Training():
         print_loss_total = 0  # Reset every print_every
         plot_loss_total = 0  # Reset every plot_every
         print_vloss = 0
-        plot_vloss = 0
         plot_train_losses = []
         plot_val_losses = []
 
@@ -114,7 +114,6 @@ class Training():
                 plot_val_losses.append(plot_vloss_avg.item())
                 plot_loss_total = 0
 
-        print(plot_train_losses, plot_val_losses)
         self.showPlot(n_epochs, plot_train_losses, plot_val_losses, plot_name)
         return final_loss
     

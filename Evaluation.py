@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from FeatureExtraction import FeatureExtraction
 from torch.utils.data import dataloader
+from torch.nn import CrossEntropyLoss
 from torchtext.data.metrics import bleu_score
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -16,16 +17,21 @@ class Evaluation():
         self.decoder = decoder
         self.vocab_eng = vocab_eng
         self.vocab_nl = vocab_nl
+        self.test_loss = 0
 
-    def evaluate(self, input_tensor):
+    def evaluate(self, input_tensor, target_tensor, criterion):
         with torch.no_grad():
             #input_tensor = self.feat_extractor.tensorFromSentence(self.vocab_eng.word2index, sentence).to(device)
 
             encoder_outputs, encoder_hidden = self.encoder(input_tensor)
             decoder_outputs, decoder_hidden, decoder_attn = self.decoder(encoder_outputs, encoder_hidden)
+
+            loss = criterion(decoder_outputs.view(-1, decoder_outputs.size(-1)),
+                             target_tensor.view(-1))
+            self.test_loss += loss
+            
             _, topi = torch.topk(decoder_outputs,1)
             decoded_ids = topi.squeeze()
-            #print(decoded_ids[:,1])
 
             decoded_words = []
             for idx in decoded_ids:
@@ -49,15 +55,15 @@ class Evaluation():
         all_output_words = []
         references = []
         index = 0
+        criterion = CrossEntropyLoss()
         with torch.no_grad():
             for data_batch in test_dataloader:
                 input_tensor, output_tensor = data_batch
                 input_tensor = input_tensor.to(device)
                 output_tensor = output_tensor.to(device)
                 for tensor_in, tensor_target in zip(input_tensor, output_tensor):
-                    #print(tensor_target)
                     references.append(self.to_words(tensor_target.view(1, -1)))
-                    output_words, _ = self.evaluate(tensor_in.view(1, -1))
+                    output_words, _ = self.evaluate(tensor_in.view(1, -1), tensor_target, criterion)
                     all_output_words.append(output_words)
                     if index < 10:
                         print("=", ' '.join(references[index][0]))
@@ -65,42 +71,7 @@ class Evaluation():
                         print('<', output_sentence)
                     index += 1
         bleu = self.calc_bleu_score(all_output_words, references)
-        return bleu
-    
-    def evaluateRandomly(self, paired_sent, n=10):
-        for i in range(n):
-            pair = random.choice(paired_sent)
-            print('>', pair[0])
-            print('=', pair[1])
-            output_words, _ = self.evaluate(pair[0])
-            output_sentence = ' '.join(output_words)
-            print('<', output_sentence)
-            print('') 
+        return bleu, float(self.test_loss / index)
 
     def calc_bleu_score(self, candidate_corpus, references_corpus):
         return bleu_score(candidate_corpus, references_corpus)
-    
-'''
-    def showAttention(self, input_sentence, output_words, attentions):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        cax = ax.matshow(attentions.cpu().numpy(), cmap='bone')
-        fig.colorbar(cax)
-
-        # Set up axes
-        ax.set_xticklabels([''] + input_sentence.split(' ') +
-                        ['<EOS>'], rotation=90)
-        ax.set_yticklabels([''] + output_words)
-
-        # Show label at every tick
-        ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
-        ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
-
-        plt.show()
-
-    def evaluateAndShowAttention(self, input_sentence):
-        output_words, attentions = self.evaluate(input_sentence)
-        print('input =', input_sentence)
-        print('output =', ' '.join(output_words))
-        self.showAttention(input_sentence, output_words, attentions[0, :len(output_words), :])
-        '''

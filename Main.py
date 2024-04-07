@@ -12,9 +12,8 @@ from Evaluation import Evaluation
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
-    
-
-    '''#run this code block once to create the cleaned_pairs.txt file, afterwards comment it out
+    '''
+    #run this code block once to create the cleaned_pairs.txt file, afterwards comment it out
     preprocesser = Preprocessing()
     # load English data
     filename_eng = 'europarl-v7.nl-en.en'
@@ -39,24 +38,24 @@ def main():
         if len(sen_nl) < 128 and len(sen_eng) < 128 and len(sen_nl) > 0 and len(sen_eng) > 0:
             paired_sent.append([eng_line, nl_line])
 
-    preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")'''
-    
+    preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")
+    '''
 
-    '''# load doc into memory
+    # load doc into memory
     with open("cleaned_pairs.txt", 'rb') as f:
         paired_sent = pickle.load(f)
         print("paired sentences loaded")
     # limit the number of sentences to your liking, to reduce training time
-    paired_sent = paired_sent[:200]'''
-    
-    '''# run this to make new vocabularies, which will be saved in the current directory
+    paired_sent = paired_sent[:200]
+    '''
+    # run this to make new vocabularies, which will be saved in the current directory
     vocab_eng_temp = MakeVocab()
     vocab_nl_temp = MakeVocab()
     vocab_eng_temp.make_vocab(paired_sent, 0)
     vocab_nl_temp.make_vocab(paired_sent, 1)
-    print('made vocabulary')'''
-    
-    '''#run this after first creating the vocabularies to load them
+    print('made vocabulary')
+    '''
+    #run this after first creating the vocabularies to load them
     vocab_eng = MakeVocab()
     vocab_nl = MakeVocab()
     vocab_eng.load_vocabularies(0)
@@ -77,10 +76,12 @@ def main():
     
     print("Training and validating...")
     trainer = Training()
-    trainer.train(train_dataloader, val_dataloader, encoder, decoder, 5, optim.Adam, 0.001, plot_name="lossplot.png" ,print_every=1, plot_every=1)
+    trainer.train(train_dataloader, val_dataloader, encoder, decoder, 5, optim.Adam, 0.001, plot_name="lossplot.png", print_every=1, plot_every=1)
     
     evaluator = Evaluation(feat_extraction, encoder, decoder, vocab_eng, vocab_nl)
-    print(evaluator.evaluate_all_bleu(test_dataloader))'''
+    bleu, test_loss = evaluator.evaluate_all_bleu(test_dataloader)
+    print("bleu: " + str(bleu))
+    print("test loss: " + str(test_loss))
 
 if __name__ == "__main__":
     main()
