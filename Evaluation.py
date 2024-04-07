@@ -1,7 +1,4 @@
 import torch
-import random
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 from FeatureExtraction import FeatureExtraction
 from torch.utils.data import dataloader
 from torch.nn import CrossEntropyLoss
