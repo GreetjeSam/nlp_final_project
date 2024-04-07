@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# The main inspiration for this class is: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
+# though we did adapt it
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class EngEncoder(nn.Module):
