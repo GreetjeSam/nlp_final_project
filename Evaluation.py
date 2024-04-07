@@ -76,5 +76,4 @@ class Evaluation():
         return bleu, float(self.test_loss / index)
 
     def calc_bleu_score(self, candidate_corpus):
-        print(len(candidate_corpus), len(self.reference_corpus))
         return bleu_score(candidate_corpus, self.reference_corpus)

@@ -28,5 +28,4 @@ class Baseline():
                     sent = ' '.join(sent)
                     translation = self.translator.translate(sent)
                     self.translations.append(translation.split())
-        print(self.translations)
         return self.translations
