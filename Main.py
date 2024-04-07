@@ -12,6 +12,7 @@ from Evaluation import Evaluation
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
+    
     ############ preprocessing
     #run this code block once to create the cleaned_pairs.txt file, afterwards comment it out
     preprocesser = Preprocessing()
@@ -39,9 +40,9 @@ def main():
             paired_sent.append([eng_line, nl_line])
 
     preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")
-    
-    
-    ############ Feature extraction
+
+    '''
+    ############ Load cleaned_pairs
     # load doc into memory
     with open("cleaned_pairs.txt", 'rb') as f:
         paired_sent = pickle.load(f)
@@ -49,6 +50,7 @@ def main():
     # limit the number of sentences to your liking, to reduce training time
     paired_sent = paired_sent[:5000]
     
+    ############ Feature extraction
     # run this to make new vocabularies, which will be saved in the current directory
     # comment this out after the vocabularies have been created
     vocab_eng_temp = MakeVocab()
@@ -85,6 +87,6 @@ def main():
     bleu, test_loss = evaluator.evaluate_all_bleu(test_dataloader)
     print("bleu: " + str(bleu))
     print("test loss: " + str(test_loss))
-
+    '''
 if __name__ == "__main__":
     main()
