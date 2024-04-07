@@ -8,11 +8,12 @@ from Evaluation import Evaluation
 import pickle
 import torch
 from Evaluation import Evaluation
+from googleTranslate import Baseline
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
-    
+    '''
     ############ preprocessing
     #run this code block once to create the cleaned_pairs.txt file, afterwards comment it out
     preprocesser = Preprocessing()
@@ -40,8 +41,8 @@ def main():
             paired_sent.append([eng_line, nl_line])
 
     preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")
-
-    '''
+'''
+    
     ############ Load cleaned_pairs
     # load doc into memory
     with open("cleaned_pairs.txt", 'rb') as f:
@@ -49,7 +50,7 @@ def main():
         print("paired sentences loaded")
     # limit the number of sentences to your liking, to reduce training time
     paired_sent = paired_sent[:5000]
-    
+    '''
     ############ Feature extraction
     # run this to make new vocabularies, which will be saved in the current directory
     # comment this out after the vocabularies have been created
@@ -58,7 +59,7 @@ def main():
     vocab_eng_temp.make_vocab(paired_sent, 0)
     vocab_nl_temp.make_vocab(paired_sent, 1)
     print('made vocabulary')
-    
+    '''
     ############ model creation, training and evaluation
     #run this after first creating the vocabularies to load them
     vocab_eng = MakeVocab()
@@ -85,8 +86,14 @@ def main():
     
     evaluator = Evaluation(feat_extraction, encoder, decoder, vocab_eng, vocab_nl)
     bleu, test_loss = evaluator.evaluate_all_bleu(test_dataloader)
+
+    baseline = Baseline(evaluator)
+    translations = baseline.create_baseline(test_dataloader)
+    baseline_bleu = evaluator.calc_bleu_score(translations)
+
     print("bleu: " + str(bleu))
+    print("baseline bleu score: " + str(baseline_bleu))
     print("test loss: " + str(test_loss))
-    '''
+    
 if __name__ == "__main__":
     main()

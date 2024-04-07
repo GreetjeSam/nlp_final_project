@@ -17,6 +17,7 @@ class Evaluation():
         self.decoder = decoder
         self.vocab_eng = vocab_eng
         self.vocab_nl = vocab_nl
+        self.reference_corpus = []
         self.test_loss = 0
 
     def evaluate(self, input_tensor, target_tensor, criterion):
@@ -70,8 +71,10 @@ class Evaluation():
                         output_sentence = ' '.join(output_words)
                         print('<', output_sentence)
                     index += 1
-        bleu = self.calc_bleu_score(all_output_words, references)
+        self.reference_corpus = references
+        bleu = self.calc_bleu_score(all_output_words)
         return bleu, float(self.test_loss / index)
 
-    def calc_bleu_score(self, candidate_corpus, references_corpus):
-        return bleu_score(candidate_corpus, references_corpus)
+    def calc_bleu_score(self, candidate_corpus):
+        print(len(candidate_corpus), len(self.reference_corpus))
+        return bleu_score(candidate_corpus, self.reference_corpus)
