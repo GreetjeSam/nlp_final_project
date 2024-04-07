@@ -1,8 +1,6 @@
-import pickle
-import MakeVocab
 import torch
 import numpy as np
-from torch.utils.data import TensorDataset, DataLoader, RandomSampler
+from torch.utils.data import TensorDataset, DataLoader
 
 # the following source was used to build this class: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
 # the train/validation/test split for the data loaders is inspired by the following source: https://www.d2l.ai/chapter_introduction/index.html
