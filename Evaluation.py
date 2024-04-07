@@ -19,14 +19,13 @@ class Evaluation():
 
     def evaluate(self, input_tensor):
         with torch.no_grad():
-            #input_tensor = self.feat_extractor.tensorFromSentence(self.vocab_eng.word2index, sentence).to(device)
-
+            #pass input through encoder decoder model
             encoder_outputs, encoder_hidden = self.encoder(input_tensor)
             decoder_outputs, decoder_hidden, decoder_attn = self.decoder(encoder_outputs, encoder_hidden)
             _, topi = torch.topk(decoder_outputs,1)
             decoded_ids = topi.squeeze()
-            #print(decoded_ids[:,1])
 
+            #convert the indices to words
             decoded_words = []
             for idx in decoded_ids:
                 if idx.item() == self.EOS_token:
@@ -38,13 +37,13 @@ class Evaluation():
     def to_words(self, tensor):
         sentence = []
         tensor = tensor.tolist()
-        #print(tensor)
         for index in tensor[0]:
             if index != 0:
                 sentence.append(str(self.vocab_nl.to_word(index)))
         sentence = [sentence]
         return sentence
     
+    #evaluate the model on the test data using bleu score
     def evaluate_all_bleu(self, test_dataloader: dataloader):
         all_output_words = []
         references = []
@@ -55,7 +54,6 @@ class Evaluation():
                 input_tensor = input_tensor.to(device)
                 output_tensor = output_tensor.to(device)
                 for tensor_in, tensor_target in zip(input_tensor, output_tensor):
-                    #print(tensor_target)
                     references.append(self.to_words(tensor_target.view(1, -1)))
                     output_words, _ = self.evaluate(tensor_in.view(1, -1))
                     all_output_words.append(output_words)
@@ -79,28 +77,3 @@ class Evaluation():
 
     def calc_bleu_score(self, candidate_corpus, references_corpus):
         return bleu_score(candidate_corpus, references_corpus)
-    
-'''
-    def showAttention(self, input_sentence, output_words, attentions):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        cax = ax.matshow(attentions.cpu().numpy(), cmap='bone')
-        fig.colorbar(cax)
-
-        # Set up axes
-        ax.set_xticklabels([''] + input_sentence.split(' ') +
-                        ['<EOS>'], rotation=90)
-        ax.set_yticklabels([''] + output_words)
-
-        # Show label at every tick
-        ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
-        ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
-
-        plt.show()
-
-    def evaluateAndShowAttention(self, input_sentence):
-        output_words, attentions = self.evaluate(input_sentence)
-        print('input =', input_sentence)
-        print('output =', ' '.join(output_words))
-        self.showAttention(input_sentence, output_words, attentions[0, :len(output_words), :])
-        '''

@@ -67,10 +67,10 @@ class Training():
         print_loss_total = 0  # Reset every print_every
         plot_loss_total = 0  # Reset every plot_every
         print_vloss = 0
-        plot_vloss = 0
         plot_train_losses = []
         plot_val_losses = []
 
+        #added weight decay to the optimizers
         encoder_optimizer = optimizer(mod.parameters(encoder), lr=learning_rate, weight_decay=1e-6)
         decoder_optimizer = optimizer(mod.parameters(decoder), lr=learning_rate, weight_decay=1e-6)
         
@@ -83,6 +83,7 @@ class Training():
             print_loss_total += loss
             plot_loss_total += loss
 
+            #calculate validation loss
             with torch.no_grad():
                 for i, vdata in enumerate(validation_loader):
                     input_tensor, target_tensor = vdata
@@ -119,7 +120,6 @@ class Training():
         return final_loss
     
     def showPlot(self, epochs, train_loss: list, val_loss: list, plot_name):
-        #plt.figure()
         epochs = range(1, epochs+1)
         plt.plot(epochs, val_loss, 'b', label='Validation Loss')
         plt.plot(epochs, train_loss, 'r', label='Training Loss')
