@@ -13,10 +13,15 @@ We unfortuanately could not push it to GitHub, because the dataset is too large.
 # As mentioned, please download the necessary datasets from the europarl website.
 # Install the following packages for python:
 numpy==1.26.4
+
 torch==2.2.2
+
 matplotlib==3.8.3
+
 torchtext==0.17.2
+
 deep_translator==1.11.4
+
 typing==3.7.4.3
 
 # Highlight any known issues, limitations, or areas for improvement in your project.
