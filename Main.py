@@ -13,7 +13,7 @@ from googleTranslate import Baseline
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
-
+    
     ############ preprocessing
     #run this code block once to create the cleaned_pairs.txt file, afterwards comment it out
     preprocesser = Preprocessing()
