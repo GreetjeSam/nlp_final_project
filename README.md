@@ -25,5 +25,7 @@ Another issue might be that the training and validation process will get killed 
 
 Limitations of our code is that we do not use the entire dataset. Areas for improvement include using Beam search, instead of greedy search Greedy search. We also do not have many layers to our model; it is not very complex.
 
+Another thing to note, is that the calculation of the baseline takes a while, because it puts all the selected sentences (the english ones) through Google Translate.
+
 # Include any additional information or resources that may be useful.
 https://www.statmt.org/europarl/
