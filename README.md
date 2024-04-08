@@ -12,11 +12,12 @@ We unfortuanately could not push it to GitHub, because the dataset is too large.
 
 # As mentioned, please download the necessary datasets from the europarl website.
 # Install the following packages for python:
-numpy == 1.26.4
-torch == 2.2.2
-matplotlib == 3.8.3
-torchtext == 0.17.2
-deep_translator == 1.11.4
+numpy==1.26.4
+torch==2.2.2
+matplotlib==3.8.3
+torchtext==0.17.2
+deep_translator==1.11.4
+typing==3.7.4.3
 
 # Highlight any known issues, limitations, or areas for improvement in your project.
 A known issue with Main.py is that: if you have first created vocabularies based on (eg.) 2000 sentences (and they're saved locally), and then you try to run the "model creation, training and evaluation" block on more than 2000 sentences, you'll get an error, because it will contain words that are not in the vocabulary. So, make sure you make vocabularies on the number of sentences you are also running the model with.
