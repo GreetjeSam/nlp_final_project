@@ -9,18 +9,18 @@ class Preprocessing():
     def __init__(self) -> None:
         pass
 
-    def load_doc(self, filename: str):
+    def load_doc(self, filename: str) -> str:
         file = open(filename, mode='rt', encoding='utf-8')
         text = file.read()
         file.close()
         return text
     
     # split a loaded document into sentences
-    def to_sentences(self, doc):
+    def to_sentences(self, doc: str) -> list[str]:
         return doc.strip().split('\n')
 
     # clean a list of lines
-    def clean_lines(self, lines):
+    def clean_lines(self, lines: list) -> list:
         cleaned = list()
         # prepare regex for char filtering
         re_print = re.compile('[^%s]' % re.escape(string.printable))
@@ -44,7 +44,7 @@ class Preprocessing():
             cleaned.append(' '.join(line))
         return cleaned
 
-    def save_clean_pairs(self, paired_sent: list, filename: str):
+    def save_clean_pairs(self, paired_sent: list, filename: str) -> None:
         with open(filename, 'wb') as f:
             pickle.dump(paired_sent, f)
         print('Saved: %s' % filename)

@@ -18,20 +18,20 @@ class Training():
     def __init__(self) -> None:
         pass
 
-    def asMinutes(self, seconds: int):
+    def asMinutes(self, seconds: int) -> str:
         minutes = math.floor(seconds / 60)
         seconds -= minutes * 60
         return '%dm %ds' % (minutes, seconds)
 
-    def timeSince(self, since: float, percent: float):
+    def timeSince(self, since: float, percent: float) -> str:
         now = time.time()
         seconds = now - since
         estimate = seconds / (percent)
         remaining = estimate - seconds
         return '%s (- %s)' % (self.asMinutes(seconds), self.asMinutes(remaining))
     
-    def train_epoch(self, train_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder, encoder_optimizer, 
-                    decoder_optimizer, criterion: CrossEntropyLoss):
+    def train_epoch(self, train_dataloader: DataLoader, encoder: EngEncoder, decoder: NlDecoder, 
+                    encoder_optimizer: optim.Adam, decoder_optimizer, criterion: CrossEntropyLoss) -> float:
         total_loss = 0
 
         for data in train_dataloader:
@@ -61,9 +61,9 @@ class Training():
         return total_loss / len(train_dataloader)
 
     # hyper parameter tuning: nr epochs, learning rate, the adam optimizer
-    def train(self, train_dataloader: DataLoader, validation_loader: DataLoader,encoder: EngEncoder, decoder: NlDecoder, n_epochs: int, 
-              optimizer: (optim.Adam|optim.Adadelta), learning_rate: float =0.001, plot_name: str = 'plot',
-               print_every: int =100, plot_every: int =100):
+    def train(self, train_dataloader: DataLoader, validation_loader: DataLoader, encoder: EngEncoder, decoder: NlDecoder, n_epochs: int, 
+              optimizer: optim.Adam, learning_rate: float =0.001, plot_name: str = 'plot',
+               print_every: int =100, plot_every: int =100) -> float:
         start = time.time()
         print_loss_total = 0  # Reset every print_every
         plot_loss_total = 0  # Reset every plot_every
@@ -119,7 +119,7 @@ class Training():
         self.showPlot(n_epochs, plot_train_losses, plot_val_losses, plot_name)
         return final_loss
     
-    def showPlot(self, epochs, train_loss: list, val_loss: list, plot_name):
+    def showPlot(self, epochs: int, train_loss: list, val_loss: list, plot_name: str) -> None:
         epochs = range(1, epochs+1)
         plt.plot(epochs, val_loss, 'b', label='Validation Loss')
         plt.plot(epochs, train_loss, 'r', label='Training Loss')

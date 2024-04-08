@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader
+from typing import Tuple
 
 # the following source was used to build this class: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
 # the train/validation/test split for the data loaders is inspired by the following source: https://www.d2l.ai/chapter_introduction/index.html
@@ -8,21 +9,21 @@ from torch.utils.data import TensorDataset, DataLoader
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class FeatureExtraction():
-    def __init__(self, eng_vocab_word2index, nl_vocab_word2index) -> None:
+    def __init__(self, eng_vocab_word2index: dict, nl_vocab_word2index: dict) -> None:
         self.EOS_token = 1
         self.SOS_token = 0
         self.eng_vocab_word2index = eng_vocab_word2index
         self.nl_vocab_word2index = nl_vocab_word2index
 
-    def indexesFromSentence(self, word2index, sentence):
+    def indexesFromSentence(self, word2index: dict, sentence: str) -> list:
         return [word2index[word] for word in sentence.split(' ')]
 
-    def tensorFromSentence(self, lang, sentence):
+    def tensorFromSentence(self, lang: dict, sentence: str) -> torch.Tensor:
         indexes = self.indexesFromSentence(lang, sentence)
         indexes.append(self.EOS_token)
         return torch.tensor(indexes, dtype=torch.long).view(1, -1)
 
-    def get_dataloader(self, batch_size, paired_sent, longest_sentence):
+    def get_dataloader(self, batch_size: int, paired_sent: list, longest_sentence: int) -> Tuple[DataLoader, DataLoader, DataLoader]:
         n = len(paired_sent)
         input_ids = np.zeros((n, longest_sentence+1), dtype=np.int32)
         target_ids = np.zeros((n, longest_sentence+1), dtype=np.int32)

@@ -1,7 +1,10 @@
 import torch
+from MakeVocab import MakeVocab
+from Encoder_Decoder import EngEncoder, NlDecoder
 from FeatureExtraction import FeatureExtraction
 from torch.utils.data import dataloader
 from torch.nn import CrossEntropyLoss
+from typing import Tuple
 from torchtext.data.metrics import bleu_score
 
 # The source for the evaluate method was inspired, but adapted, by: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
@@ -10,7 +13,8 @@ from torchtext.data.metrics import bleu_score
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Evaluation():
-    def __init__(self, feat_extractor: FeatureExtraction, encoder, decoder, vocab_eng, vocab_nl) -> None:
+    def __init__(self, feat_extractor: FeatureExtraction, encoder: EngEncoder, decoder: NlDecoder, 
+                 vocab_eng: MakeVocab, vocab_nl: MakeVocab) -> None:
         self.EOS_token = 1
         self.feat_extractor = feat_extractor
         self.encoder = encoder
@@ -20,7 +24,8 @@ class Evaluation():
         self.reference_corpus = []
         self.test_loss = 0
 
-    def evaluate(self, input_tensor, target_tensor, criterion):
+    def evaluate(self, input_tensor: torch.Tensor, target_tensor: torch.Tensor, 
+                 criterion: CrossEntropyLoss) -> Tuple[list, torch.Tensor]:
         with torch.no_grad():
             #pass input through encoder decoder model
             encoder_outputs, encoder_hidden = self.encoder(input_tensor)
@@ -42,7 +47,7 @@ class Evaluation():
                 decoded_words.append(self.vocab_nl.index2word[idx.item()])
         return decoded_words, decoder_attn
     
-    def to_words(self, tensor):
+    def to_words(self, tensor: torch.Tensor) -> list[list]:
         sentence = []
         tensor = tensor.tolist()
         for index in tensor[0]:
@@ -52,7 +57,7 @@ class Evaluation():
         return sentence
     
     #evaluate the model on the test data using bleu score
-    def evaluate_all_bleu(self, test_dataloader: dataloader):
+    def evaluate_all_bleu(self, test_dataloader: dataloader) -> Tuple[float, float]:
         all_output_words = []
         references = []
         index = 0
@@ -75,5 +80,5 @@ class Evaluation():
         bleu = self.calc_bleu_score(all_output_words)
         return bleu, float(self.test_loss / index)
 
-    def calc_bleu_score(self, candidate_corpus):
+    def calc_bleu_score(self, candidate_corpus: list) -> float:
         return bleu_score(candidate_corpus, self.reference_corpus)

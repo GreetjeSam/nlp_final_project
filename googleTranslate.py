@@ -1,15 +1,17 @@
 from deep_translator import GoogleTranslator
+from Evaluation import Evaluation
+from torch.utils.data import DataLoader
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Baseline():
-    def __init__(self, evaluator) -> None:
+    def __init__(self, evaluator: Evaluation) -> None:
         self.translator = GoogleTranslator(source="en", target="nl")
         self.translations = []
         self.evaluator = evaluator
 
-    def to_words(self, tensor):
+    def to_words(self, tensor: torch.Tensor) -> list[list]:
         sentence = []
         tensor = tensor.tolist()
         for index in tensor[0]:
@@ -18,7 +20,7 @@ class Baseline():
         sentence = [sentence]
         return sentence
 
-    def create_baseline(self, test_dataloader):
+    def create_baseline(self, test_dataloader: DataLoader) -> list:
         for batch in test_dataloader:
             input_tensor, _ = batch
             input_tensor = input_tensor.to(device)

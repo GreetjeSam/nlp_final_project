@@ -13,7 +13,7 @@ from googleTranslate import Baseline
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main():
-    '''
+
     ############ preprocessing
     #run this code block once to create the cleaned_pairs.txt file, afterwards comment it out
     preprocesser = Preprocessing()
@@ -41,7 +41,6 @@ def main():
             paired_sent.append([eng_line, nl_line])
 
     preprocesser.save_clean_pairs(paired_sent, "cleaned_pairs.txt")
-'''
     
     ############ Load cleaned_pairs
     # load doc into memory
@@ -50,7 +49,7 @@ def main():
         print("paired sentences loaded")
     # limit the number of sentences to your liking, to reduce training time
     paired_sent = paired_sent[:5000]
-    '''
+    
     ############ Feature extraction
     # run this to make new vocabularies, which will be saved in the current directory
     # comment this out after the vocabularies have been created
@@ -59,7 +58,7 @@ def main():
     vocab_eng_temp.make_vocab(paired_sent, 0)
     vocab_nl_temp.make_vocab(paired_sent, 1)
     print('made vocabulary')
-    '''
+    
     ############ model creation, training and evaluation
     #run this after first creating the vocabularies to load them
     vocab_eng = MakeVocab()
@@ -68,14 +67,17 @@ def main():
     vocab_nl.load_vocabularies(1)
     print('Loaded vocabularies...')
 
+    # obtain the longest sentence from the english and dutch datasets combined
     if vocab_eng.longest_sentence > vocab_nl.longest_sentence:
         longest_sentence = vocab_eng.longest_sentence
     else:
         longest_sentence = vocab_nl.longest_sentence
 
+    # create data loaders for the train/val/test split
     feat_extraction = FeatureExtraction(vocab_eng.word2index, vocab_nl.word2index)
     train_dataloader, val_dataloader, test_dataloader = feat_extraction.get_dataloader(256, paired_sent, longest_sentence)
 
+    # create the encoder-decoder model
     hidden_state_size = 128
     encoder = EngEncoder(vocab_eng.num_words, hidden_state_size, longest_sentence+1).to(device)
     decoder = NlDecoder(hidden_state_size, vocab_nl.num_words, vocab_nl, longest_sentence+1).to(device)
@@ -84,9 +86,11 @@ def main():
     trainer = Training()
     trainer.train(train_dataloader, val_dataloader, encoder, decoder, 15, optim.Adam, 0.001, plot_name="lossplot.png", print_every=1, plot_every=1)
     
+    # calculate the model's bleu score and the test loss
     evaluator = Evaluation(feat_extraction, encoder, decoder, vocab_eng, vocab_nl)
     bleu, test_loss = evaluator.evaluate_all_bleu(test_dataloader)
 
+    # calculate the baseline bleu score (google translate)
     baseline = Baseline(evaluator)
     translations = baseline.create_baseline(test_dataloader)
     baseline_bleu = evaluator.calc_bleu_score(translations)

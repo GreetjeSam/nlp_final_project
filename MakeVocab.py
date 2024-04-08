@@ -12,7 +12,7 @@ class MakeVocab():
         self.num_sentences = 0
         self.longest_sentence = 0
     
-    def add_word(self, word):
+    def add_word(self, word: str) -> None:
             if word not in self.word2index:
                 # First entry of word into vocabulary
                 self.word2index[word] = self.num_words
@@ -23,7 +23,7 @@ class MakeVocab():
                 # Word exists; increase word count
                 self.word2count[word] += 1
 
-    def add_sentence(self, sentence):
+    def add_sentence(self, sentence: str) -> None:
             sentence_len = 0
             for word in sentence.split(' '):
                 sentence_len += 1
@@ -34,7 +34,7 @@ class MakeVocab():
             # Count the number of sentences
             self.num_sentences += 1
 
-    def make_vocab(self, paired_sent, index):
+    def make_vocab(self, paired_sent: list, index: int) -> None:
         for pair in paired_sent:
              self.add_sentence(pair[index])
 
@@ -53,7 +53,7 @@ class MakeVocab():
         with open("words_sents_Lsents" + str(index) + ".txt", 'wb') as f:
              pickle.dump([self.num_words, self.num_sentences, self.longest_sentence], f)
 
-    def load_vocabularies(self, index):
+    def load_vocabularies(self, index: int) -> None:
         with open("index2word" + str(index) + ".txt", 'rb') as f:
             self.index2word = pickle.load(f)
 
@@ -69,8 +69,8 @@ class MakeVocab():
             self.num_sentences = nwords_nsetns_Lsent[1]
             self.longest_sentence = nwords_nsetns_Lsent[2]
 
-    def to_word(self, index):
+    def to_word(self, index: int) -> str:
         return self.index2word[index]
 
-    def to_index(self, word):
+    def to_index(self, word: str) -> int:
         return self.word2index[word]

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from typing import Tuple
 
 # The main inspiration for this class is: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
 # though we did adapt it
@@ -8,7 +9,7 @@ import torch.nn.functional as F
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class EngEncoder(nn.Module):
-    def __init__(self, eng_vocab_size: int, hidden_state_size: int, longest_sentence, dropout_probability: float = 0.2):
+    def __init__(self, eng_vocab_size: int, hidden_state_size: int, longest_sentence: int, dropout_probability: float = 0.2) -> None:
         super(EngEncoder, self).__init__()
         self.hidden_size = hidden_state_size
 
@@ -25,7 +26,7 @@ class EngEncoder(nn.Module):
         #using the dropout to zero the elements in the tensor with the dropout_probability
         self.dropout = nn.Dropout(dropout_probability)
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
 
         #embedding the input
         embedded = self.embedding(input)
@@ -41,7 +42,7 @@ class EngEncoder(nn.Module):
     
 
 class Attention(nn.Module):
-    def __init__(self, hidden_state_size: int):
+    def __init__(self, hidden_state_size: int) -> None:
         super(Attention, self).__init__()
         
         #apply the linear transformation
@@ -49,7 +50,7 @@ class Attention(nn.Module):
         self.k = nn.Linear(hidden_state_size, hidden_state_size)
         self.v = nn.Linear(hidden_state_size, 1)
 
-    def forward(self, query, keys):
+    def forward(self, query: torch.Tensor, keys: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
 
         #calculate the scores of every hidden state
         scores = self.v(torch.tanh(self.q(query) + self.k(keys)))
@@ -65,7 +66,8 @@ class Attention(nn.Module):
 
 
 class NlDecoder(nn.Module):
-    def __init__(self, hidden_state_size: int, nl_vocab_size: int, vocab_nl, longest_sentence: int, dropout_probability: float = 0.2):
+    def __init__(self, hidden_state_size: int, nl_vocab_size: int, vocab_nl, 
+                 longest_sentence: int, dropout_probability: float = 0.2) -> None:
         super(NlDecoder, self).__init__()
 
         #using the embedding module to get word embeddings 
@@ -88,7 +90,8 @@ class NlDecoder(nn.Module):
         self.vocab_nl = vocab_nl
         self.longest_sentence = longest_sentence
 
-    def forward(self, encoder_outputs, encoder_hidden_state, target_tensor=None):
+    def forward(self, encoder_outputs: torch.Tensor, encoder_hidden_state: torch.Tensor, 
+                target_tensor: torch.Tensor =None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
 
         #get the batch size 
         batch_size = encoder_outputs.size(0)
@@ -134,7 +137,8 @@ class NlDecoder(nn.Module):
         return decoder_outputs, decoder_hidden_state, attentions
 
 
-    def forward_step(self, input, hidden, encoder_outputs):
+    def forward_step(self, input: torch.Tensor, hidden: torch.Tensor, 
+                     encoder_outputs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
 
         #embed the input
         embedded =  self.embedding(input)
